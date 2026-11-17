@@ -80,7 +80,7 @@ export const PEOPLE = {
     'Yuhe Gong', 'Tianyu Ren', 'Yang Shen', 'Fang Li', 'Dianxun Xiao',
   ],
   rki: [
-    'Georges Hattab', 'Akshat Dubey', 'Aleksandar Anzel', 'Moritz Weckbecker', 'Bahar Ilgen', 'Chisom Ezekannagha',
+    'Georges Hattab', 'Akshat Dubey', 'Aleksandar Anžel', 'Moritz Weckbecker', 'Bahar İlgen', 'Chisom Ezekannagha',
     'Luis Roger Esquivel Gomez', 'Nadezdha Malysheva', 'Juliane Pfeil', 'Sandra M. Butow', 'Christopher Irrgang',
     'Nils Korber', 'Denise Kuhnert', 'Katharina Ladewig',
   ],
