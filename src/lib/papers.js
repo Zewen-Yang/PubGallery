@@ -86,7 +86,7 @@ function buildPapers() {
 
 // ---- Room layout ----------------------------------------------------------
 // Bookcases stand on an arc facing the room centre (origin).
-export const CASE = { width: 3.3, rowH: 1.58, rows: Math.max(3, ...BOOKCASES.map((b) => b.shelves.length)), board: 0.1, depth: 0.85, plinth: 0.3, side: 0.14, crown: 0.36 };
+export const CASE = { width: 3.3, rowH: 1.58, rows: Math.max(3, ...BOOKCASES.map((b) => b.shelves.length)), board: 0.1, depth: 0.85, plinth: 0.3, side: 0.14, crown: 0.52 };
 CASE.height = CASE.plinth + CASE.rows * CASE.rowH + CASE.board + CASE.crown;
 export const ROOM = { radius: 7.2, spread: 0.56 };
 

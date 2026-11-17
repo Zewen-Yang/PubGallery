@@ -169,9 +169,9 @@ function Bookcase({ bc, mats, texts }) {
       <Text
         ref={(el) => el && texts.add(el)}
         font={FONT}
-        position={[0, H - crown / 2 + 0.07, D / 2 + 0.125]}
-        fontSize={0.12}
-        letterSpacing={0.22}
+        position={[0, H - crown / 2 + 0.115, D / 2 + 0.125]}
+        fontSize={0.2}
+        letterSpacing={0.09}
         anchorX="center"
         anchorY="middle"
         color="#d6b25e"
@@ -181,9 +181,9 @@ function Bookcase({ bc, mats, texts }) {
       <Text
         ref={(el) => el && texts.add(el)}
         font={FONT}
-        position={[0, H - crown / 2 - 0.075, D / 2 + 0.125]}
-        fontSize={0.065}
-        letterSpacing={0.3}
+        position={[0, H - crown / 2 - 0.13, D / 2 + 0.125]}
+        fontSize={0.11}
+        letterSpacing={0.24}
         anchorX="center"
         anchorY="middle"
         color="#9c8150"
@@ -201,18 +201,22 @@ function Bookcase({ bc, mats, texts }) {
         <group key={r}>
           {row.shelf && (
             <group position={[0, boardY(rows - 1 - r), D / 2 + 0.004]}>
+              {/* Dark plate in a thin brass frame; the gilt lettering is unlit, so it reads from across the room. */}
               <mesh material={mats.brass}>
-                <boxGeometry args={[Math.max(1.3, row.shelf.name.length * 0.046 + 0.36), 0.082, 0.008]} />
+                <boxGeometry args={[Math.max(1.7, row.shelf.name.length * 0.078 + 0.56), 0.15, 0.008]} />
+              </mesh>
+              <mesh material={mats.woodDark} position={[0, 0, 0.002]}>
+                <boxGeometry args={[Math.max(1.7, row.shelf.name.length * 0.078 + 0.56) - 0.024, 0.126, 0.008]} />
               </mesh>
               <Text
                 ref={(el) => el && texts.add(el)}
                 font={FONT}
-                position={[0, -0.002, 0.006]}
-                fontSize={0.056}
-                letterSpacing={0.14}
+                position={[0, -0.002, 0.008]}
+                fontSize={0.1}
+                letterSpacing={0.09}
                 anchorX="center"
                 anchorY="middle"
-                color="#24160a"
+                color="#d6b25e"
               >
                 {`${row.shelf.name.toUpperCase()}  ·  ${row.shelf.count}`}
               </Text>
