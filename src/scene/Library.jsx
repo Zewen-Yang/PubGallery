@@ -19,7 +19,7 @@ function useRoomMaterials() {
       // Shelf label holders, as in an old library: tarnished brass around an aged paper card.
       // The card glows faintly so its lettering reads in the dim room.
       holder: m({ color: '#8a6a2c', emissive: '#22170a', metalness: 0.85, roughness: 0.5 }),
-      card: m({ color: '#e4d5ad', emissive: '#6e6142', roughness: 0.95 }),
+      card: m({ color: '#cdb478', emissive: '#4f3f1c', roughness: 0.95 }),
       screw: m({ color: '#5e4a22', emissive: '#150e05', metalness: 0.9, roughness: 0.4 }),
       wall: m({ color: '#17110d', roughness: 1, side: THREE.BackSide }),
       panel: m({ color: '#1d1510', roughness: 0.95 }),
