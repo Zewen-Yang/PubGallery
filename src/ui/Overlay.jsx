@@ -148,7 +148,7 @@ export function IndexNav() {
             </button>
           ))}
         </div>
-        <div className="index-hint">Drag to turn · drag up/down to tip the globe · hover a star or a city</div>
+        <div className="index-hint">Drag to turn the globe · scroll to move in · hover a star or a city</div>
       </footer>
     );
   return (

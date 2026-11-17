@@ -159,7 +159,7 @@ function layoutRoom(papers, books) {
 // hangs below them (see scene/Globe.jsx).
 export const MAP_CENTER = [0, 2.8, -4.2];
 const RING = 4.4;
-const STAR_LIFT = 1.8;
+const STAR_LIFT = 2.3;
 const CLUSTER_Y = [0.7, -0.5, 0.5, -0.7];
 
 function layoutStars(papers) {

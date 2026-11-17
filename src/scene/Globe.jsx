@@ -11,9 +11,9 @@ import { siteObjects } from './registry.js';
 import { useStore, anim } from '../store.js';
 import { FONT } from './fonts.js';
 
-export const GLOBE_R = 2.25;
+export const GLOBE_R = 3.0;
 // The globe hangs below the star clusters.
-export const GLOBE_CENTER = [MAP_CENTER[0], MAP_CENTER[1] - 2.55, MAP_CENTER[2]];
+export const GLOBE_CENTER = [MAP_CENTER[0], MAP_CENTER[1] - 3.4, MAP_CENTER[2]];
 const TILT = 0.42; // tip the north towards the viewer
 const FACE_LON = 62; // longitude that faces the camera at rest (between Europe and China)
 // Spin (about the globe's axis) that brings longitude `lon` to face the camera.
@@ -34,6 +34,8 @@ export function sph(lat, lon, r = 1) {
 }
 
 const fade = () => THREE.MathUtils.smoothstep(anim.map, 0.45, 1);
+// Markers and labels keep roughly their on-screen size when the camera moves in.
+const shrink = () => THREE.MathUtils.lerp(1, 0.27, anim.zoom);
 
 // The land as a matrix of dots: evenly spread points on the sphere, kept where a (hidden)
 // equirectangular country map says there is land. Collaborator countries get white dots.
@@ -60,7 +62,7 @@ function useLandDots() {
     }
     const px = ctx.getImageData(0, 0, W, H).data;
 
-    const N = 30000;
+    const N = 64000;
     const pos = [];
     const col = [];
     const size = [];
@@ -186,13 +188,13 @@ function Site({ site, isHome }) {
     const mode = st.mode;
     const f = focusOf(st);
     const hot = !!(f && f.site(site));
-    const o = fade();
+    const o = fade() * shrink();
     const k = THREE.MathUtils.damp(dot.current.userData.k ?? 1, hot ? 1.7 : 1, 8, dt);
     dot.current.userData.k = k;
     dot.current.scale.setScalar(Math.max(size * k * o, 1e-4));
     const t = (state.clock.elapsedTime * 0.6 + site.lon * 0.01) % 1;
     ring.current.scale.setScalar(size * (1.4 + t * (isHome ? 2.2 : 3)) * o + 1e-4);
-    ring.current.material.opacity = (1 - t) * 0.7 * o;
+    ring.current.material.opacity = (1 - t) * 0.7 * fade();
     dot.current.visible = ring.current.visible = mode === 'map' || o > 0.01;
   });
   return (
@@ -223,60 +225,92 @@ function Site({ site, isHome }) {
   );
 }
 
-// One label per city, floating just above the surface; hidden once it turns to the far side.
-const LABEL_TWEAK = { 'Hong Kong': { anchorY: 'top', y: -0.05 }, Guangzhou: { y: 0.02 }, Nottingham: { anchorY: 'top', y: -0.05 } };
+// One label per city, floating just above the surface. Labels on the far side are hidden, and
+// where several would collide on screen only the busiest city keeps its label (move in to see more).
+const LABEL_FONT = 0.13;
 const _w = new THREE.Vector3();
 const _c = new THREE.Vector3();
+const _p = new THREE.Vector3();
+const _n = new THREE.Vector3();
 function CityLabels() {
   const refs = useRef([]);
   const anchors = useRef([]);
+  const scalers = useRef([]);
   const cities = useMemo(() => {
     const m = new Map();
-    for (const s of SITES) if (!m.has(s.city)) m.set(s.city, { city: s.city, lat: s.lat, lon: s.lon });
-    return [...m.values()];
+    for (const s of SITES) {
+      const c = m.get(s.city) ?? { city: s.city, lat: s.lat, lon: s.lon, n: 0, sites: [] };
+      c.n += s.papers.length;
+      c.sites.push(s);
+      m.set(s.city, c);
+    }
+    return [...m.values()].sort((a, b) => b.n - a.n);
   }, []);
-  useFrame((state) => {
+  const shown = useRef(cities.map(() => 0));
+  useFrame((state, dt) => {
     const o = THREE.MathUtils.smoothstep(anim.map, 0.75, 1);
-    const root = anchors.current[0]?.parent?.parent; // the spinning group
+    const root = anchors.current[0]?.parent; // the spinning group
     if (!root) return;
     root.getWorldPosition(_c);
-    refs.current.forEach((t, i) => {
-      const g = anchors.current[i];
-      if (!t || !g) return;
-      g.getWorldPosition(_w);
-      const n = _w.clone().sub(_c).normalize();
-      const v = state.camera.position.clone().sub(_w).normalize();
-      const face = THREE.MathUtils.smoothstep(n.dot(v), 0.15, 0.4);
-      t.fillOpacity = o * face * 0.92;
-      t.outlineOpacity = o * face * 0.8;
-      t.visible = o * face > 0.01;
+    const k = shrink();
+    const f = focusOf(useStore.getState());
+    const { width, height } = state.size;
+    const placed = [];
+    // Cities the view is pointing at go first, then by number of papers.
+    const order = cities.map((c, i) => i).sort((i, j) => {
+      const hi = f && cities[i].sites.some(f.site) ? 1 : 0;
+      const hj = f && cities[j].sites.some(f.site) ? 1 : 0;
+      return hj - hi || i - j;
     });
+    for (const i of order) {
+      const t = refs.current[i];
+      const g = anchors.current[i];
+      if (!t || !g) continue;
+      g.getWorldPosition(_w);
+      const n = _n.copy(_w).sub(_c).normalize();
+      const dist = state.camera.position.distanceTo(_w);
+      const face = THREE.MathUtils.smoothstep(n.dot(_p.copy(state.camera.position).sub(_w).normalize()), 0.15, 0.4);
+      // Screen-space box of the label, to keep labels from piling up.
+      _p.copy(_w).project(state.camera);
+      const x = (_p.x * 0.5 + 0.5) * width;
+      const y = (-_p.y * 0.5 + 0.5) * height;
+      const h = ((LABEL_FONT * k * height) / 2 / (dist * Math.tan((state.camera.fov * Math.PI) / 360))) * 1.25;
+      const box = [x - 4, y - h, x + cities[i].city.length * h * 0.42 + 8, y + h * 0.3];
+      const free = face > 0.01 && !placed.some((b) => box[0] < b[2] && box[2] > b[0] && box[1] < b[3] && box[3] > b[1]);
+      if (free) placed.push(box);
+      shown.current[i] = THREE.MathUtils.damp(shown.current[i], free ? 1 : 0, 10, dt);
+      const a = o * face * shown.current[i];
+      // Labels are hidden by the far-side test above, never by the globe's surface cutting through them.
+      if (t.material.depthTest) t.material.depthTest = false;
+      t.fillOpacity = a * 0.92;
+      t.outlineOpacity = a * 0.8;
+      t.visible = a > 0.01;
+      scalers.current[i]?.scale.setScalar(k);
+    }
   });
-  return cities.map((c, i) => {
-    const tw = LABEL_TWEAK[c.city] || {};
-    return (
-      <group key={c.city} ref={(el) => (anchors.current[i] = el)} position={sph(c.lat, c.lon, GLOBE_R * 1.01)}>
-        <Billboard>
+  return cities.map((c, i) => (
+    <group key={c.city} ref={(el) => (anchors.current[i] = el)} position={sph(c.lat, c.lon, GLOBE_R * 1.008)}>
+      <Billboard>
+        <group ref={(el) => (scalers.current[i] = el)}>
           <Text
             ref={(el) => (refs.current[i] = el)}
             font={FONT}
-            fontSize={0.12}
+            fontSize={LABEL_FONT}
             letterSpacing={0.06}
             color="#f3e9d2"
             anchorX="left"
-            anchorY={tw.anchorY || 'bottom'}
-            position={[0.06, tw.y ?? 0.04, 0]}
+            anchorY="bottom"
+            position={[0.07, 0.04, 0]}
             outlineWidth={0.012}
             outlineColor="#03040b"
             renderOrder={10}
-            material-depthTest={false}
           >
             {c.city}
           </Text>
-        </Billboard>
-      </group>
-    );
-  });
+        </group>
+      </Billboard>
+    </group>
+  ));
 }
 
 export function Globe() {
@@ -323,7 +357,7 @@ export function Globe() {
             <shaderMaterial
               vertexShader={DOT_VERT}
               fragmentShader={DOT_FRAG}
-              uniforms={{ uOpacity: { value: 0 }, uScale: { value: 1 }, uSize: { value: GLOBE_R * 0.017 } }}
+              uniforms={{ uOpacity: { value: 0 }, uScale: { value: 1 }, uSize: { value: GLOBE_R * 0.0115 } }}
               vertexColors
               transparent
               depthWrite={false}

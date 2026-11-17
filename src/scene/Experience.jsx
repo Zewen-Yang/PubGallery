@@ -11,7 +11,7 @@ import { FONT } from './fonts.js';
 import { useStore, anim } from '../store.js';
 import { Library } from './Library.jsx';
 import { Paper } from './Paper.jsx';
-import { Globe } from './Globe.jsx';
+import { Globe, GLOBE_R, GLOBE_CENTER } from './Globe.jsx';
 import { FOV, TAN, focusPose, displaySlots } from './display.js';
 
 const LIB_BG = new THREE.Color('#0d0907');
@@ -36,10 +36,23 @@ function Director() {
       drag.current.y = e.clientY;
     };
     const up = () => (drag.current.down = false);
+    // Wheel (or pinch) moves in on the globe and back out to the whole map.
+    const wheel = (e) => {
+      if (useStore.getState().mode !== 'map') return;
+      e.preventDefault();
+      anim.zoomGoal = THREE.MathUtils.clamp(anim.zoomGoal - e.deltaY * 0.0014, 0, 1);
+    };
+    el.addEventListener('wheel', wheel, { passive: false });
+    // Pinning a country moves in on it; closing the panel moves back out.
+    const unsub = useStore.subscribe((s, prev) => {
+      if (s.country !== prev.country) anim.zoomGoal = s.country ? Math.max(anim.zoomGoal, 0.72) : 0;
+    });
     el.addEventListener('pointerdown', down);
     window.addEventListener('pointermove', move);
     window.addEventListener('pointerup', up);
     return () => {
+      unsub();
+      el.removeEventListener('wheel', wheel);
       el.removeEventListener('pointerdown', down);
       window.removeEventListener('pointermove', move);
       window.removeEventListener('pointerup', up);
@@ -54,6 +67,8 @@ function Director() {
     const target = mode === 'map' ? 1 : 0;
     const step = dt / 1.6;
     anim.map = target > anim.map ? Math.min(target, anim.map + step) : Math.max(target, anim.map - step);
+    if (mode !== 'map') anim.zoomGoal = 0;
+    anim.zoom = THREE.MathUtils.damp(anim.zoom, anim.zoomGoal, 3.2, dt);
 
     if (mode === 'map') {
       // Sideways drags turn the star clusters and the globe; up/down drags tip the globe only.
@@ -101,10 +116,25 @@ function CameraRig() {
     } else if (mode === 'map') {
       const mapFit = Math.max(19, 16 / aspect);
       // A pinned country opens a panel on the left: slide the view so the globe sits beside it.
-      const off = useStore.getState().country && aspect > 1.1 ? -Math.min(4.2, mapFit * TAN * aspect * 0.42) : 0;
-      pos = [MAP_CENTER[0] + off + px * 1.2, MAP_CENTER[1] + 1.6 + py * 1.2, MAP_CENTER[2] + mapFit];
-      look.set(MAP_CENTER[0] + off, MAP_CENTER[1], MAP_CENTER[2]);
-      smooth = 1.1;
+      const pinned = useStore.getState().country && aspect > 1.1;
+      const z = anim.zoom;
+      // Far: the whole map. Near: close on the side of the globe that faces the viewer.
+      const nearD = GLOBE_R + 3.4;
+      const offFar = pinned ? -Math.min(4.2, mapFit * TAN * aspect * 0.42) : 0;
+      const offNear = pinned ? -3.4 * TAN * aspect * 0.42 : 0;
+      const off = THREE.MathUtils.lerp(offFar, offNear, z);
+      const sway = 1.2 * (1 - 0.85 * z);
+      pos = [
+        THREE.MathUtils.lerp(MAP_CENTER[0], GLOBE_CENTER[0], z) + off + px * sway,
+        THREE.MathUtils.lerp(MAP_CENTER[1] + 1.6, GLOBE_CENTER[1] + 0.9, z) + py * sway,
+        THREE.MathUtils.lerp(MAP_CENTER[2] + mapFit, GLOBE_CENTER[2] + nearD, z),
+      ];
+      look.set(
+        THREE.MathUtils.lerp(MAP_CENTER[0], GLOBE_CENTER[0], z) + off,
+        THREE.MathUtils.lerp(MAP_CENTER[1], GLOBE_CENTER[1] + 0.5, z),
+        MAP_CENTER[2],
+      );
+      smooth = 0.5;
     } else if (focus) {
       const bc = CASE_BY_ID[focus];
       const pose = focusPose(bc, aspect);
