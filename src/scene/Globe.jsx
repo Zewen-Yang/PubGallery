@@ -1,15 +1,13 @@
 import { useMemo, useRef } from 'react';
 import { useFrame } from '@react-three/fiber';
-import { Billboard, Text } from '@react-three/drei';
 import * as THREE from 'three';
 import { geoEquirectangular, geoPath } from 'd3-geo';
 import { feature } from 'topojson-client';
 import world from 'world-atlas/countries-110m.json';
 import { MAP_CENTER } from '../lib/papers.js';
-import { SITES, SITE_BY_ID, COUNTRY_BY_ISO, HOME, focusOf } from '../lib/collab.js';
-import { siteObjects } from './registry.js';
+import { SITES, SITE_BY_ID, COUNTRY_BY_ISO, CITIES, HOME, focusOf } from '../lib/collab.js';
+import { siteObjects, cityAnchors, labelEls } from './registry.js';
 import { useStore, anim } from '../store.js';
-import { FONT } from './fonts.js';
 
 export const GLOBE_R = 3.0;
 // The globe hangs below the star clusters.
@@ -225,91 +223,136 @@ function Site({ site, isHome }) {
   );
 }
 
-// One label per city, floating just above the surface. Labels on the far side are hidden, and
-// where several would collide on screen only the busiest city keeps its label (move in to see more).
-const LABEL_FONT = 0.13;
+// City labels are DOM elements (ui/CityLabels.jsx) laid out here every frame, in screen space:
+// each label looks for free room near its city (open sea, usually) and a thin leader line joins
+// them, so crowded regions such as Europe stay readable without moving in.
 const _w = new THREE.Vector3();
 const _c = new THREE.Vector3();
-const _p = new THREE.Vector3();
 const _n = new THREE.Vector3();
-function CityLabels() {
-  const refs = useRef([]);
-  const anchors = useRef([]);
-  const scalers = useRef([]);
-  const cities = useMemo(() => {
-    const m = new Map();
-    for (const s of SITES) {
-      const c = m.get(s.city) ?? { city: s.city, lat: s.lat, lon: s.lon, n: 0, sites: [] };
-      c.n += s.papers.length;
-      c.sites.push(s);
-      m.set(s.city, c);
-    }
-    return [...m.values()].sort((a, b) => b.n - a.n);
-  }, []);
-  const shown = useRef(cities.map(() => 0));
+const _v = new THREE.Vector3();
+const DIRS = Array.from({ length: 12 }, (_, i) => (i * Math.PI) / 6);
+const STEPS = [8, 24, 44, 68, 96, 130, 170];
+const overlap = (a, b) => a[0] < b[2] && a[2] > b[0] && a[1] < b[3] && a[3] > b[1];
+
+function CityLabelLayout() {
+  const anchors = useRef({});
+  const state0 = useMemo(() => Object.fromEntries(CITIES.map((c) => [c.city, { x: 0, y: 0, a: 0, pick: null, w: 0, h: 0 }])), []);
   useFrame((state, dt) => {
-    const o = THREE.MathUtils.smoothstep(anim.map, 0.75, 1);
-    const root = anchors.current[0]?.parent; // the spinning group
+    const { width, height } = state.size;
+    const st = useStore.getState();
+    const o = st.mode === 'map' && !st.listOpen ? THREE.MathUtils.smoothstep(anim.map, 0.8, 1) : 0;
+    const f = focusOf(st);
+    const root = anchors.current[CITIES[0].city]?.parent;
     if (!root) return;
     root.getWorldPosition(_c);
-    const k = shrink();
-    const f = focusOf(useStore.getState());
-    const { width, height } = state.size;
-    const placed = [];
-    // Cities the view is pointing at go first, then by number of papers.
-    const order = cities.map((c, i) => i).sort((i, j) => {
-      const hi = f && cities[i].sites.some(f.site) ? 1 : 0;
-      const hj = f && cities[j].sites.some(f.site) ? 1 : 0;
-      return hj - hi || i - j;
-    });
-    for (const i of order) {
-      const t = refs.current[i];
-      const g = anchors.current[i];
-      if (!t || !g) continue;
+    const toScreen = (v) => [(v.x * 0.5 + 0.5) * width, (-v.y * 0.5 + 0.5) * height];
+
+    // Visible cities in screen space.
+    const vis = [];
+    for (const c of CITIES) {
+      const g = anchors.current[c.city];
+      const el = labelEls[c.city];
+      if (!g || !el) continue;
       g.getWorldPosition(_w);
-      const n = _n.copy(_w).sub(_c).normalize();
-      const dist = state.camera.position.distanceTo(_w);
-      const face = THREE.MathUtils.smoothstep(n.dot(_p.copy(state.camera.position).sub(_w).normalize()), 0.15, 0.4);
-      // Screen-space box of the label, to keep labels from piling up.
-      _p.copy(_w).project(state.camera);
-      const x = (_p.x * 0.5 + 0.5) * width;
-      const y = (-_p.y * 0.5 + 0.5) * height;
-      const h = ((LABEL_FONT * k * height) / 2 / (dist * Math.tan((state.camera.fov * Math.PI) / 360))) * 1.25;
-      const box = [x - 4, y - h, x + cities[i].city.length * h * 0.42 + 8, y + h * 0.3];
-      const free = face > 0.01 && !placed.some((b) => box[0] < b[2] && box[2] > b[0] && box[1] < b[3] && box[3] > b[1]);
-      if (free) placed.push(box);
-      shown.current[i] = THREE.MathUtils.damp(shown.current[i], free ? 1 : 0, 10, dt);
-      const a = o * face * shown.current[i];
-      // Labels are hidden by the far-side test above, never by the globe's surface cutting through them.
-      if (t.material.depthTest) t.material.depthTest = false;
-      t.fillOpacity = a * 0.92;
-      t.outlineOpacity = a * 0.8;
-      t.visible = a > 0.01;
-      scalers.current[i]?.scale.setScalar(k);
+      _n.copy(_w).sub(_c).normalize();
+      const face = THREE.MathUtils.smoothstep(_n.dot(_v.copy(state.camera.position).sub(_w).normalize()), 0.12, 0.35);
+      const [x, y] = toScreen(_v.copy(_w).project(state.camera));
+      const s0 = state0[c.city];
+      if (!s0.w && el.label.offsetWidth) {
+        s0.w = el.label.offsetWidth;
+        s0.h = el.label.offsetHeight;
+      }
+      vis.push({ c, el, s0, x, y, face, hot: !!(f && c.sites.some(f.site)) });
+    }
+    const [cx, cy] = toScreen(_v.copy(_c).project(state.camera));
+
+    // Place: hot cities first, then busiest. Obstacles are the city dots and labels already placed.
+    const order = vis.filter((v) => v.face > 0.02 && o > 0).sort((a, b) => b.hot - a.hot || b.c.n - a.c.n);
+    const boxes = order.map((v) => [v.x - 5, v.y - 5, v.x + 5, v.y + 5]);
+    for (const v of order) {
+      const { s0 } = v;
+      // Lean away from neighbours (and, when alone, away from the globe's centre).
+      let px = 0;
+      let py = 0;
+      for (const u of order) {
+        if (u === v) continue;
+        const dx = v.x - u.x;
+        const dy = v.y - u.y;
+        const d2 = dx * dx + dy * dy;
+        if (d2 < 120 * 120) {
+          px += dx / (d2 + 30);
+          py += dy / (d2 + 30);
+        }
+      }
+      if (Math.hypot(px, py) < 1e-4) {
+        px = v.x - cx || 1;
+        py = (v.y - cy) * 0.4;
+      }
+      const lean = Math.atan2(py, px);
+      const cand = [];
+      for (const d of STEPS)
+        for (const th of DIRS) {
+          let dth = Math.abs(((th - lean + Math.PI * 3) % (Math.PI * 2)) - Math.PI);
+          const ex = v.x + Math.cos(th) * d;
+          const ey = v.y + Math.sin(th) * d;
+          const right = Math.cos(th) >= -0.2;
+          const bx = right ? ex + 3 : ex - 3 - s0.w;
+          const box = [bx, ey - s0.h / 2, bx + s0.w, ey + s0.h / 2];
+          cand.push({ key: `${d}|${th}`, ex, ey, box, score: d + dth * 30 });
+        }
+      cand.sort((a, b) => a.score - b.score);
+      const inView = (b) => b[0] > 8 && b[2] < width - 8 && b[1] > 70 && b[3] < height - 10;
+      const free = (b) => inView(b) && !boxes.some((o2) => overlap(b, o2));
+      const prev = s0.pick && cand.find((k) => k.key === s0.pick);
+      const best = cand.find((k) => free(k.box));
+      // Keep the last spot while it is still free and not much worse (no flicker while turning).
+      const pick = prev && free(prev.box) && (!best || prev.score < best.score + 40) ? prev : best;
+      v.pick = pick;
+      if (pick) {
+        boxes.push(pick.box);
+        s0.pick = pick.key;
+      }
+    }
+
+    // Write to the DOM (eased, so labels glide rather than jump).
+    const k = 1 - Math.exp(-14 * dt);
+    for (const v of vis) {
+      const { el, s0, pick } = v;
+      const target = pick && o > 0 ? 1 : 0;
+      s0.a = THREE.MathUtils.damp(s0.a, target * v.face, 10, dt);
+      const a = s0.a * o * (f && !v.hot ? 0.4 : 1);
+      if (pick) {
+        const jump = !s0.x || Math.hypot(s0.x - pick.box[0], s0.y - pick.box[1]) > 260;
+        s0.x = jump ? pick.box[0] : s0.x + (pick.box[0] - s0.x) * k;
+        s0.y = jump ? pick.box[1] : s0.y + (pick.box[1] - s0.y) * k;
+        s0.ex = pick.ex;
+        s0.ey = pick.ey;
+      }
+      el.label.style.opacity = a.toFixed(3);
+      el.label.style.visibility = a > 0.02 ? 'visible' : 'hidden';
+      el.label.style.transform = `translate(${s0.x.toFixed(1)}px, ${s0.y.toFixed(1)}px)`;
+      el.label.classList.toggle('hot', v.hot);
+      // Leader line from the dot to the label's near edge.
+      const right = s0.ex >= v.x - 1;
+      const lx = right ? s0.x : s0.x + s0.w;
+      const ly = s0.y + s0.h / 2;
+      const long = Math.hypot(lx - v.x, ly - v.y) > 12;
+      el.line.setAttribute('x1', v.x.toFixed(1));
+      el.line.setAttribute('y1', v.y.toFixed(1));
+      el.line.setAttribute('x2', lx.toFixed(1));
+      el.line.setAttribute('y2', ly.toFixed(1));
+      el.line.style.opacity = long ? (a * (v.hot ? 0.9 : 0.5)).toFixed(3) : '0';
     }
   });
-  return cities.map((c, i) => (
-    <group key={c.city} ref={(el) => (anchors.current[i] = el)} position={sph(c.lat, c.lon, GLOBE_R * 1.008)}>
-      <Billboard>
-        <group ref={(el) => (scalers.current[i] = el)}>
-          <Text
-            ref={(el) => (refs.current[i] = el)}
-            font={FONT}
-            fontSize={LABEL_FONT}
-            letterSpacing={0.06}
-            color="#f3e9d2"
-            anchorX="left"
-            anchorY="bottom"
-            position={[0.07, 0.04, 0]}
-            outlineWidth={0.012}
-            outlineColor="#03040b"
-            renderOrder={10}
-          >
-            {c.city}
-          </Text>
-        </group>
-      </Billboard>
-    </group>
+  return CITIES.map((c) => (
+    <group
+      key={c.city}
+      ref={(el) => {
+        anchors.current[c.city] = el;
+        cityAnchors[c.city] = el;
+      }}
+      position={sph(c.lat, c.lon, GLOBE_R * 1.004)}
+    />
   ));
 }
 
@@ -370,7 +413,7 @@ export function Globe() {
           {SITES.map((s) => (
             <Site key={s.id} site={s} isHome={s.id === HOME} />
           ))}
-          <CityLabels />
+          <CityLabelLayout />
         </group>
       </group>
     </group>

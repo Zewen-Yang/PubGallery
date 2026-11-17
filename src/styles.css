@@ -229,6 +229,19 @@ a { color: inherit; }
 .cp-y { color: var(--gold); font-variant-numeric: tabular-nums; flex: none; }
 .cp-t { font-family: var(--serif); font-size: 15px; }
 
+/* ---------- city labels on the globe (laid out by scene/Globe.jsx) ---------- */
+.citylabels { position: fixed; inset: 0; z-index: 3; pointer-events: none; }
+.cl-lines { position: absolute; inset: 0; width: 100%; height: 100%; overflow: visible; }
+.cl-lines line { stroke: #e9edf5; stroke-width: 0.8; }
+.cl-label {
+  position: absolute; left: 0; top: 0; white-space: nowrap; pointer-events: auto; cursor: pointer;
+  font-family: var(--serif); font-size: 13px; line-height: 1; padding: 3px 5px; border-radius: 4px;
+  color: #e9edf5; background: rgba(3, 4, 11, 0.62); text-shadow: 0 0 4px #03040b; will-change: transform, opacity;
+}
+.cl-label span { font-family: var(--sans); font-size: 9px; letter-spacing: 0.06em; color: rgba(233, 237, 245, 0.55); margin-left: 4px; }
+.cl-label:hover, .cl-label.hot { color: #fff; background: rgba(18, 21, 34, 0.9); box-shadow: 0 0 0 1px rgba(233, 237, 245, 0.35); }
+.cl-label.hot span { color: rgba(255, 255, 255, 0.85); }
+
 /* ---------- focus panel ---------- */
 .scrim {
   position: fixed; inset: 0; z-index: 6; pointer-events: none; animation: fade 0.8s ease both;

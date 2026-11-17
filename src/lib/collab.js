@@ -70,3 +70,17 @@ export function focusOf({ hovered, hoveredSite, country }) {
   if (country) return { paper: (id) => COUNTRY_PAPERS[country].has(id), site: (s) => s.iso === country };
   return null;
 }
+
+// One entry per city (several institutions may share one), busiest first.
+export const CITIES = (() => {
+  const m = new Map();
+  for (const s of list) {
+    const c = m.get(s.city) ?? { city: s.city, iso: s.iso, country: s.country, lat: s.lat, lon: s.lon, sites: [], papers: new Set() };
+    c.sites.push(s);
+    s.papers.forEach((id) => c.papers.add(id));
+    m.set(s.city, c);
+  }
+  return [...m.values()]
+    .map((c) => ({ ...c, n: c.papers.size, main: c.sites[0].id }))
+    .sort((a, b) => b.n - a.n);
+})();
