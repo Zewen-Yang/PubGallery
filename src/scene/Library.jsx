@@ -16,6 +16,8 @@ function useRoomMaterials() {
       wood: m({ color: '#3d2617', roughness: 0.72 }),
       woodDark: m({ color: '#1f140c', roughness: 0.9 }),
       brass: m({ color: '#c9a24e', emissive: '#3b2a0c', metalness: 0.75, roughness: 0.32 }),
+      // Shelf plates: the same brass, glowing a little so the engraving reads in the dim room.
+      plate: m({ color: '#d4ad57', emissive: '#7a5a1a', metalness: 0.7, roughness: 0.3 }),
       wall: m({ color: '#17110d', roughness: 1, side: THREE.BackSide }),
       panel: m({ color: '#1d1510', roughness: 0.95 }),
       rug: m({ color: '#3b1c18', roughness: 1 }),
@@ -201,22 +203,18 @@ function Bookcase({ bc, mats, texts }) {
         <group key={r}>
           {row.shelf && (
             <group position={[0, boardY(rows - 1 - r), D / 2 + 0.004]}>
-              {/* Dark plate in a thin brass frame; the gilt lettering is unlit, so it reads from across the room. */}
-              <mesh material={mats.brass}>
+              <mesh material={mats.plate}>
                 <boxGeometry args={[Math.max(1.7, row.shelf.name.length * 0.078 + 0.56), 0.15, 0.008]} />
-              </mesh>
-              <mesh material={mats.woodDark} position={[0, 0, 0.002]}>
-                <boxGeometry args={[Math.max(1.7, row.shelf.name.length * 0.078 + 0.56) - 0.024, 0.126, 0.008]} />
               </mesh>
               <Text
                 ref={(el) => el && texts.add(el)}
                 font={FONT}
-                position={[0, -0.002, 0.008]}
+                position={[0, -0.002, 0.006]}
                 fontSize={0.1}
                 letterSpacing={0.09}
                 anchorX="center"
                 anchorY="middle"
-                color="#d6b25e"
+                color="#1c1006"
               >
                 {`${row.shelf.name.toUpperCase()}  ·  ${row.shelf.count}`}
               </Text>
