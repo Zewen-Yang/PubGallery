@@ -3,6 +3,11 @@
 // of each author (built by `npm run sync:aff`; hand fixes live in src/data/collaborators.js).
 import { PAPERS } from './papers.js';
 import AFF from '../data/affiliations.json';
+import { normName } from '../data/collaborators.js';
+
+// The bib spells some people more than one way ("Anzel" / "Anžel"); count them once and show the
+// fullest spelling (accents kept, broken LaTeX such as "undefinedlgen" avoided).
+const better = (a, b) => (/undefined/.test(a) ? b : /undefined/.test(b) ? a : /[^\x00-\x7f]/.test(b) && !/[^\x00-\x7f]/.test(a) ? b : a);
 
 export const HOME = AFF.home;
 
@@ -18,10 +23,12 @@ function build() {
       if (a.me) return;
       for (const id of ids) {
         const s = (sites[id] ??= { id, ...AFF.institutions[id], people: new Map(), papers: new Set() });
-        const person = s.people.get(a.name) ?? { name: a.name, unsure: false, papers: new Set() };
+        const key = normName(a.name);
+        const person = s.people.get(key) ?? { key, name: a.name, unsure: false, papers: new Set() };
+        person.name = better(person.name, a.name);
         person.unsure ||= a.unsure;
         person.papers.add(p.id);
-        s.people.set(a.name, person);
+        s.people.set(key, person);
         s.papers.add(p.id);
       }
     });
@@ -40,7 +47,7 @@ function build() {
     const c = (countries[s.iso] ??= { iso: s.iso, name: s.country, sites: [], papers: new Set(), names: new Set() });
     c.sites.push(s);
     s.papers.forEach((id) => c.papers.add(id));
-    s.people.forEach((x) => c.names.add(x.name));
+    s.people.forEach((x) => c.names.add(x.key));
   }
   const clist = Object.values(countries)
     .map((c) => ({ ...c, papers: [...c.papers], people: c.names.size }))
@@ -54,7 +61,7 @@ export const SITE_BY_ID = Object.fromEntries(list.map((s) => [s.id, s]));
 export const COUNTRIES = clist;
 export const COUNTRY_BY_ISO = Object.fromEntries(clist.map((c) => [c.iso, c]));
 export const INSTITUTIONS = AFF.institutions;
-export const COLLABORATOR_COUNT = new Set(list.flatMap((s) => s.people.map((x) => x.name))).size;
+export const COLLABORATOR_COUNT = new Set(list.flatMap((s) => s.people.map((x) => x.key))).size;
 
 // Lookups for linking the paper stars and the globe.
 export const PAPER_SITES = {};

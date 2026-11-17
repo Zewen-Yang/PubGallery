@@ -260,11 +260,13 @@ export function HoverCard() {
   const siteId = useStore((s) => s.hoveredSite);
   const mode = useStore((s) => s.mode);
   const site = mode === 'map' && siteId && SITE_BY_ID[siteId];
+  // With a country panel open on the left, the card moves to the right so it does not cover it.
+  const pinned = useStore((s) => !!s.country);
   const p = !site && id && PAPER_BY_ID[id];
   const bc = p && CASE_BY_ID[p.bookcase];
   const where = p && mode === 'map' ? (PAPER_SITES[p.id] || []).map((sid) => SITE_BY_ID[sid]) : [];
   return (
-    <div className={`hovercard ${mode === 'map' ? 'top' : ''} ${p || site ? 'show' : ''}`} aria-hidden>
+    <div className={`hovercard ${mode === 'map' ? 'top' : ''} ${mode === 'map' && pinned ? 'beside' : ''} ${p || site ? 'show' : ''}`} aria-hidden>
       {p && (
         <>
           <div className="hc-meta">

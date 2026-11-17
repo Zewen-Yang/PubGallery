@@ -57,6 +57,9 @@ a { color: inherit; }
 .hovercard.show { opacity: 1; transform: translate(-50%, 0); }
 /* On the star map the globe sits at the bottom, so the card goes to the top. */
 .hovercard.top { bottom: auto; top: 76px; }
+/* Country panel open on the left: sit in the free space to its right. */
+.hovercard.beside { left: auto; right: 24px; width: min(440px, calc(100vw - 480px)); transform: translate(0, 8px); }
+.hovercard.beside.show { transform: none; }
 .hc-meta { display: flex; align-items: center; gap: 8px; font-size: 11px; letter-spacing: 0.12em; text-transform: uppercase; color: var(--ink-dim); }
 .hc-meta i { width: 9px; height: 9px; border-radius: 50%; display: inline-block; }
 .star-tag { color: var(--gold); }
@@ -219,8 +222,13 @@ a { color: inherit; }
 .countrypanel { scrollbar-width: none; -webkit-mask-image: linear-gradient(180deg, #000 calc(100% - 36px), transparent); mask-image: linear-gradient(180deg, #000 calc(100% - 36px), transparent); }
 .countrypanel::-webkit-scrollbar { display: none; }
 .countrypanel > :last-child { margin-bottom: 28px; }
-.cp-close { all: unset; cursor: pointer; position: absolute; top: 14px; right: 18px; font-size: 24px; color: var(--ink-dim); }
-.cp-close:hover { color: var(--ink); }
+.cp-close {
+  /* Stays in the panel's top-right corner while its content scrolls. */
+  all: unset; cursor: pointer; position: sticky; top: -8px; float: right; z-index: 2; margin: -8px -10px 0 8px;
+  width: 30px; height: 30px; display: grid; place-items: center; border-radius: 50%;
+  font-size: 22px; line-height: 1; color: var(--ink-dim); background: rgba(8, 10, 20, 0.85); border: 1px solid var(--line);
+}
+.cp-close:hover { color: var(--ink); border-color: rgba(243, 233, 210, 0.4); }
 .cp-site { border-top: 1px solid var(--line); margin-top: 18px; padding-top: 14px; }
 .cp-site h2 { font-family: var(--serif); font-weight: 400; font-size: 20px; margin: 0 0 6px; }
 .cp-site h2 span { font-family: var(--sans); font-size: 11px; letter-spacing: 0.12em; text-transform: uppercase; color: var(--ink-dim); margin-left: 6px; }
@@ -343,6 +351,7 @@ body.pointing, body.pointing canvas { cursor: none; }
   .sh-n, .fp-shelves button.on .sh-n { font-size: 14px; white-space: nowrap; }
   .hovercard { bottom: 120px; }
   .hovercard.top { top: 112px; }
+  .hovercard.beside { display: none; }
   .countrypanel { top: 118px; left: 16px; bottom: auto; max-height: 46vh; width: calc(100vw - 32px); }
   .index-lead { display: none; }
   .openbook { grid-template-columns: 1fr; overflow: auto; }
