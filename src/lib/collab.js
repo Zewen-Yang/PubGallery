@@ -1,30 +1,31 @@
-// Who I wrote with, where they were: institutions (sites) and countries, built from the bib authors
-// and src/data/collaborators.js.
+// Who I wrote with, and where they were: institutions (sites) and countries.
+// Affiliations follow the paper: src/data/affiliations.json lists, for every paper, the institutions
+// of each author (built by `npm run sync:aff`; hand fixes live in src/data/collaborators.js).
 import { PAPERS } from './papers.js';
-import { HOME, INSTITUTIONS, AFFILIATION, normName } from '../data/collaborators.js';
+import AFF from '../data/affiliations.json';
 
-export { HOME };
+export const HOME = AFF.home;
 
 function build() {
   const sites = {};
-  const unknown = new Set();
   for (const p of PAPERS) {
-    for (const a of p.authors) {
-      if (a.me) continue;
-      const aff = AFFILIATION[normName(a.name)];
-      if (!aff) {
-        unknown.add(a.name);
-        continue;
+    const row = AFF.papers[p.id] || [];
+    p.authors.forEach((a, i) => {
+      const [ids = [], src = null] = row[i] || [];
+      // Each author carries their affiliations on this paper (also shown in the open book).
+      a.aff = ids;
+      a.unsure = src === 'inferred' || src === 'guess';
+      if (a.me) return;
+      for (const id of ids) {
+        const s = (sites[id] ??= { id, ...AFF.institutions[id], people: new Map(), papers: new Set() });
+        const person = s.people.get(a.name) ?? { name: a.name, unsure: false, papers: new Set() };
+        person.unsure ||= a.unsure;
+        person.papers.add(p.id);
+        s.people.set(a.name, person);
+        s.papers.add(p.id);
       }
-      const inst = INSTITUTIONS[aff.inst];
-      const s = (sites[aff.inst] ??= { id: aff.inst, ...inst, people: new Map(), papers: new Set() });
-      const person = s.people.get(a.name) ?? { name: a.name, unsure: aff.unsure, papers: new Set() };
-      person.papers.add(p.id);
-      s.people.set(a.name, person);
-      s.papers.add(p.id);
-    }
+    });
   }
-  if (import.meta.env?.DEV && unknown.size) console.warn('[collab] no affiliation for:', [...unknown]);
 
   const list = Object.values(sites)
     .map((s) => ({
@@ -36,13 +37,13 @@ function build() {
 
   const countries = {};
   for (const s of list) {
-    const c = (countries[s.iso] ??= { iso: s.iso, name: s.country, sites: [], papers: new Set(), people: 0 });
+    const c = (countries[s.iso] ??= { iso: s.iso, name: s.country, sites: [], papers: new Set(), names: new Set() });
     c.sites.push(s);
     s.papers.forEach((id) => c.papers.add(id));
-    c.people += s.people.length;
+    s.people.forEach((x) => c.names.add(x.name));
   }
   const clist = Object.values(countries)
-    .map((c) => ({ ...c, papers: [...c.papers] }))
+    .map((c) => ({ ...c, papers: [...c.papers], people: c.names.size }))
     .sort((a, b) => b.papers.length - a.papers.length);
   return { list, clist };
 }
@@ -52,7 +53,8 @@ export const SITES = list;
 export const SITE_BY_ID = Object.fromEntries(list.map((s) => [s.id, s]));
 export const COUNTRIES = clist;
 export const COUNTRY_BY_ISO = Object.fromEntries(clist.map((c) => [c.iso, c]));
-export const COLLABORATOR_COUNT = list.reduce((n, s) => n + s.people.length, 0);
+export const INSTITUTIONS = AFF.institutions;
+export const COLLABORATOR_COUNT = new Set(list.flatMap((s) => s.people.map((x) => x.name))).size;
 
 // Lookups for linking the paper stars and the globe.
 export const PAPER_SITES = {};

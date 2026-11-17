@@ -1,7 +1,7 @@
 import { useEffect, useMemo, useRef, useState } from 'react';
 import { useStore } from '../store.js';
 import { PAPERS, PAPER_BY_ID, BOOKCASES, CASE_BY_ID, shelfOf, shelfPapers, placeFor, isOn } from '../lib/papers.js';
-import { COUNTRIES, COUNTRY_BY_ISO, SITE_BY_ID, COLLABORATOR_COUNT, HOME as HOME_SITE } from '../lib/collab.js';
+import { COUNTRIES, COUNTRY_BY_ISO, SITE_BY_ID, PAPER_SITES, INSTITUTIONS, COLLABORATOR_COUNT, HOME as HOME_SITE } from '../lib/collab.js';
 
 const HOME = 'https://zewen-yang.github.io';
 const ROMAN = ['I', 'II', 'III', 'IV', 'V', 'VI'];
@@ -14,6 +14,46 @@ function Authors({ authors }) {
       {i < authors.length - 1 ? ', ' : ''}
     </span>
   ));
+}
+
+// Authors with numbered affiliations, as printed on the paper: every institution each author
+// listed on this particular paper. A "?" marks an affiliation that is not confirmed.
+function AuthorsWithAffiliations({ authors }) {
+  const order = [];
+  authors.forEach((a) => (a.aff || []).forEach((id) => order.includes(id) || order.push(id)));
+  if (!order.length)
+    return (
+      <p className="authors">
+        <Authors authors={authors} />
+      </p>
+    );
+  return (
+    <>
+      <p className="authors">
+        {authors.map((a, i) => (
+          <span key={i}>
+            {a.me ? <b>{a.name}</b> : a.name}
+            {a.mark}
+            {a.aff?.length > 0 && (
+              <sup className="aff-n">
+                {a.aff.map((id) => order.indexOf(id) + 1).join(',')}
+                {a.unsure ? '?' : ''}
+              </sup>
+            )}
+            {i < authors.length - 1 ? ', ' : ''}
+          </span>
+        ))}
+      </p>
+      <ol className="affs">
+        {order.map((id, i) => (
+          <li key={id}>
+            <sup>{i + 1}</sup>
+            {INSTITUTIONS[id].name}, {INSTITUTIONS[id].city}
+          </li>
+        ))}
+      </ol>
+    </>
+  );
 }
 
 // ---------------------------------------------------------------------------
@@ -74,7 +114,7 @@ export function TopBar() {
           Library
         </button>
         <button className={active === 'map' ? 'on' : ''} onClick={() => setMode('map')}>
-          Collaborators
+          Star Map
         </button>
         <button className={active === 'list' ? 'on' : ''} onClick={() => toggleList(true)}>
           List
@@ -96,7 +136,7 @@ export function IndexNav() {
   if (mode === 'map')
     return (
       <footer className="indexnav">
-        <div className="index-items">
+        <div className="index-items compact">
           <span className="index-lead">
             <b>{COLLABORATOR_COUNT}</b> co-authors · <b>{COUNTRIES.length}</b> countries
           </span>
@@ -104,11 +144,11 @@ export function IndexNav() {
             <button key={c.iso} className={country === c.iso ? 'on' : ''} onClick={() => pickCountry(c.iso)}>
               <span className="nm">{c.name}</span>
               <span className="ct">{c.papers.length}</span>
-              <i style={{ background: 'var(--gold)' }} />
+              <i style={{ background: 'var(--ink)' }} />
             </button>
           ))}
         </div>
-        <div className="index-hint">Drag to turn the globe · click a city</div>
+        <div className="index-hint">Drag to turn · drag up/down to tip the globe · hover a star or a city</div>
       </footer>
     );
   return (
@@ -210,24 +250,32 @@ export function HoverCard() {
   const id = useStore((s) => s.hovered);
   const siteId = useStore((s) => s.hoveredSite);
   const mode = useStore((s) => s.mode);
-  const p = mode === 'library' && id && PAPER_BY_ID[id];
   const site = mode === 'map' && siteId && SITE_BY_ID[siteId];
+  const p = !site && id && PAPER_BY_ID[id];
+  const bc = p && CASE_BY_ID[p.bookcase];
+  const where = p && mode === 'map' ? (PAPER_SITES[p.id] || []).map((sid) => SITE_BY_ID[sid]) : [];
   return (
-    <div className={`hovercard ${p || site ? 'show' : ''}`} aria-hidden>
+    <div className={`hovercard ${mode === 'map' ? 'top' : ''} ${p || site ? 'show' : ''}`} aria-hidden>
       {p && (
         <>
           <div className="hc-meta">
-            <i style={{ background: p.color }} />
+            <i style={{ background: mode === 'map' ? bc.star : p.color }} />
             {p.abbr || p.venue} · {p.year}
             {p.selected && <span className="star-tag">★ selected</span>}
           </div>
           <div className="hc-title">{p.title}</div>
+          {mode === 'map' && (
+            <div className="hc-hint">
+              {bc.name} · {shelfOf(p).name}
+              {where.length > 0 && <> · with {where.map((x) => (x.name.includes(x.city) ? x.name : `${x.name} (${x.city})`)).join(', ')}</>}
+            </div>
+          )}
         </>
       )}
       {site && (
         <>
           <div className="hc-meta">
-            <i style={{ background: 'var(--gold)' }} />
+            <i style={{ background: 'var(--ink)' }} />
             {site.city} · {site.country}
             {site.id === HOME_SITE && <span className="star-tag">home</span>}
           </div>
@@ -301,7 +349,7 @@ export function Cursor() {
   const hoveredCase = useStore((s) => s.hoveredCase);
   const hoveredSite = useStore((s) => s.hoveredSite);
   const mode = useStore((s) => s.mode);
-  const label = mode === 'map' ? (hoveredSite ? 'Show' : '') : hovered ? 'Open' : hoveredCase ? 'Enter' : '';
+  const label = mode === 'map' ? (hoveredSite ? 'Show' : hovered ? 'Find' : '') : hovered ? 'Open' : hoveredCase ? 'Enter' : '';
   useEffect(() => {
     const pos = { x: -100, y: -100, cx: -100, cy: -100 };
     let raf;
@@ -443,9 +491,7 @@ export function Detail() {
             </div>
           )}
           <h2>{p.title}</h2>
-          <p className="authors">
-            <Authors authors={p.authors} />
-          </p>
+          <AuthorsWithAffiliations authors={p.authors} />
           {p.annotation && <p className="annotation">{p.annotation}</p>}
           <div className="venue">
             <span className="abbr">{p.abbr}</span>

@@ -2,7 +2,8 @@ import { create } from 'zustand';
 import { PAPER_BY_ID, BOOKCASES, CASE_BY_ID, placeFor } from './lib/papers.js';
 
 // Animated values shared by every frame loop (kept outside React to avoid re-renders).
-export const anim = { map: 0, rotY: 0, dragV: 0 };
+// dragV / dragVy: drag momentum; dYaw / dPitch: what the drag turned this frame (the globe follows both).
+export const anim = { map: 0, rotY: 0, dragV: 0, dragVy: 0, dYaw: 0, dPitch: 0 };
 
 function setHash(id) {
   const url = id ? `#${encodeURIComponent(id)}` : window.location.pathname + window.location.search;

@@ -55,6 +55,8 @@ a { color: inherit; }
   border: 1px solid var(--line); backdrop-filter: blur(12px);
 }
 .hovercard.show { opacity: 1; transform: translate(-50%, 0); }
+/* On the star map the globe sits at the bottom, so the card goes to the top. */
+.hovercard.top { bottom: auto; top: 76px; }
 .hc-meta { display: flex; align-items: center; gap: 8px; font-size: 11px; letter-spacing: 0.12em; text-transform: uppercase; color: var(--ink-dim); }
 .hc-meta i { width: 9px; height: 9px; border-radius: 50%; display: inline-block; }
 .star-tag { color: var(--gold); }
@@ -97,6 +99,9 @@ a { color: inherit; }
 .page h3 { font-size: 13px; font-family: var(--sans); letter-spacing: 0.18em; text-transform: uppercase; margin: 0 0 12px; color: #6b5a44; }
 .authors { font-size: 17px; line-height: 1.5; margin: 0 0 8px; }
 .authors b { font-weight: 600; text-decoration: underline; text-decoration-color: var(--gold); text-underline-offset: 3px; }
+.aff-n { font-family: var(--sans); font-size: 9px; margin-left: 1px; color: #8a6d2a; }
+.affs { list-style: none; margin: 0 0 10px; padding: 0; font-size: 12.5px; line-height: 1.45; color: rgba(43, 33, 24, 0.7); }
+.affs sup { font-family: var(--sans); font-size: 8.5px; margin-right: 3px; color: #8a6d2a; }
 .annotation { font-size: 13px; font-style: italic; color: #6b5a44; margin: 0 0 14px; }
 .venue { display: flex; flex-wrap: wrap; align-items: baseline; gap: 10px; font-style: italic; font-size: 16px; margin-top: 18px; }
 .abbr { font-style: normal; font-family: var(--sans); font-size: 11px; font-weight: 700; letter-spacing: 0.08em; padding: 3px 8px; border: 1px solid currentColor; border-radius: 4px; }
@@ -198,10 +203,13 @@ a { color: inherit; }
 .index-hint { font-size: 11px; letter-spacing: 0.14em; text-transform: uppercase; color: var(--ink-dim); white-space: nowrap; }
 
 /* ---------- collaborators (globe) ---------- */
+.index-items.compact { gap: 2px 20px; }
+.index-items.compact .nm { font-size: 15px; }
+.index-items.compact button { padding: 3px 0; }
 .index-lead { align-self: center; font-size: 11px; letter-spacing: 0.14em; text-transform: uppercase; color: var(--ink-dim); padding-right: 24px; border-right: 1px solid var(--line); }
 .index-lead b { font-family: var(--serif); font-size: 18px; font-weight: 400; color: var(--gold); letter-spacing: 0; }
 .countrypanel {
-  position: fixed; z-index: 7; top: 92px; left: 28px; bottom: 96px; width: min(400px, calc(100vw - 56px));
+  position: fixed; z-index: 7; top: 92px; left: 28px; bottom: 118px; width: min(400px, calc(100vw - 56px));
   overflow-y: auto; padding: 22px 24px; border-radius: 16px;
   background: rgba(8, 10, 20, 0.72); border: 1px solid var(--line); backdrop-filter: blur(14px);
   animation: rise 0.6s cubic-bezier(.2,.7,.2,1) both;
@@ -317,6 +325,7 @@ body.pointing, body.pointing canvas { cursor: none; }
   .fp-shelves button::before, .sh-i, .sh-c { display: none; }
   .sh-n, .fp-shelves button.on .sh-n { font-size: 14px; white-space: nowrap; }
   .hovercard { bottom: 120px; }
+  .hovercard.top { top: 112px; }
   .countrypanel { top: 118px; left: 16px; bottom: auto; max-height: 46vh; width: calc(100vw - 32px); }
   .index-lead { display: none; }
   .openbook { grid-template-columns: 1fr; overflow: auto; }

@@ -154,16 +154,18 @@ function layoutRoom(papers, books) {
   });
 }
 
-// ---- Star map (orbiting the collaborators globe) ------------------------------
-// The globe sits at MAP_CENTER; each bookcase becomes a cluster of stars on a ring around it.
+// ---- Star map -------------------------------------------------------------------
+// Each bookcase becomes a cluster of stars on a ring above MAP_CENTER; the collaborators globe
+// hangs below them (see scene/Globe.jsx).
 export const MAP_CENTER = [0, 2.8, -4.2];
-const RING = 5.6;
-const CLUSTER_Y = [1.1, -0.8, 0.8, -1.1];
+const RING = 4.4;
+const STAR_LIFT = 1.8;
+const CLUSTER_Y = [0.7, -0.5, 0.5, -0.7];
 
 function layoutStars(papers) {
   BOOKCASES.forEach((bc, ci) => {
     const a = (ci / BOOKCASES.length) * Math.PI * 2 + Math.PI / 4;
-    const center = [MAP_CENTER[0] + Math.cos(a) * RING, MAP_CENTER[1] + CLUSTER_Y[ci], MAP_CENTER[2] + Math.sin(a) * RING];
+    const center = [MAP_CENTER[0] + Math.cos(a) * RING, MAP_CENTER[1] + STAR_LIFT + CLUSTER_Y[ci], MAP_CENTER[2] + Math.sin(a) * RING];
     bc.starCenter = center;
     const group = papers.filter((p) => p.bookcase === bc.id);
     const R = 0.75 + group.length * 0.045;

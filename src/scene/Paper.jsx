@@ -6,6 +6,8 @@ import * as THREE from 'three';
 import { useStore, anim } from '../store.js';
 import { FONT } from './fonts.js';
 import { displaySlots } from './display.js';
+import { focusOf } from '../lib/collab.js';
+import { starObjects } from './registry.js';
 
 const clamp01 = (x) => Math.min(1, Math.max(0, x));
 const smooth = (a, b, x) => {
@@ -26,10 +28,11 @@ const fwd = new THREE.Vector3();
 const tmp = new THREE.Vector3();
 
 function titleSize(n) {
-  if (n <= 42) return 0.092;
-  if (n <= 70) return 0.078;
-  if (n <= 105) return 0.067;
-  return 0.058;
+  if (n <= 42) return 0.106;
+  if (n <= 70) return 0.09;
+  if (n <= 105) return 0.077;
+  if (n <= 118) return 0.068;
+  return 0.061;
 }
 
 function byline(authors) {
@@ -39,13 +42,13 @@ function byline(authors) {
 
 // The front cover: venue + year, the full title, and the authors, inside a thin gilt frame.
 function Cover({ p, w, h, d }) {
-  const m = 0.05; // frame inset
-  const pad = 0.1; // text inset
+  const m = 0.04; // frame inset
+  const pad = 0.075; // text inset
   const fw = d - m * 2;
   const fh = h - m * 2;
   const line = 0.006;
   const abbr = (p.abbr || (p.isJournal ? 'Journal' : 'Conference')).toUpperCase();
-  const abbrSize = abbr.length > 9 ? 0.038 : 0.05;
+  const abbrSize = abbr.length > 9 ? 0.043 : 0.056;
   return (
     <group position={[w / 2 + 0.003, 0, 0]} rotation={[0, Math.PI / 2, 0]}>
       {/* gilt frame */}
@@ -65,7 +68,7 @@ function Cover({ p, w, h, d }) {
       <Text font={FONT} position={[-d / 2 + pad, h / 2 - 0.135, 0]} fontSize={abbrSize} letterSpacing={abbr.length > 9 ? 0.06 : 0.14} anchorX="left" anchorY="middle" color="#d2ae58">
         {abbr}
       </Text>
-      <Text font={FONT} position={[d / 2 - pad, h / 2 - 0.135, 0]} fontSize={0.046} letterSpacing={0.04} anchorX="right" anchorY="middle" color="#d2ae58">
+      <Text font={FONT} position={[d / 2 - pad, h / 2 - 0.135, 0]} fontSize={0.054} letterSpacing={0.04} anchorX="right" anchorY="middle" color="#d2ae58">
         {String(p.year)}
       </Text>
       <mesh material={GOLD_FLAT} position={[0, h / 2 - 0.195, 0]}>
@@ -74,10 +77,10 @@ function Cover({ p, w, h, d }) {
 
       <Text
         font={FONT}
-        position={[-d / 2 + pad, h / 2 - 0.25, 0]}
+        position={[-d / 2 + pad, h / 2 - 0.24, 0]}
         fontSize={titleSize(p.title.length)}
         maxWidth={d - pad * 2}
-        lineHeight={1.12}
+        lineHeight={1.1}
         textAlign="left"
         anchorX="left"
         anchorY="top"
@@ -87,7 +90,7 @@ function Cover({ p, w, h, d }) {
         {p.title}
       </Text>
 
-      <Text font={FONT} position={[-d / 2 + pad, -h / 2 + 0.125, 0]} fontSize={0.042} maxWidth={d - pad * 2 - 0.08} anchorX="left" anchorY="middle" color="#c5b58e">
+      <Text font={FONT} position={[-d / 2 + pad, -h / 2 + 0.125, 0]} fontSize={0.05} maxWidth={d - pad * 2 - 0.08} anchorX="left" anchorY="middle" color="#c5b58e">
         {byline(p.authors)}
       </Text>
       {p.selected && (
@@ -102,12 +105,17 @@ function Cover({ p, w, h, d }) {
 export function Paper({ p, order }) {
   const group = useRef();
   const book = useRef();
+  const star = useRef();
+  const halo = useRef();
+  const emph = useRef({ v: 1 });
   const pull = useRef({ v: 0 });
   const sel = useRef({ v: 0 });
   const dsp = useRef({ v: 0 });
   // `p` is one book (one placement of a paper); `p.key` is the paper. Hover and selection are per
-  // paper, so only the copy on the shelf in front of you reacts.
-  const isHovered = useStore((s) => s.hovered === p.key && s.mode === 'library' && s.focus === p.bookcase && s.shelf === p.shelf);
+  // paper, so only the copy on the shelf in front of you (or the home copy on the star map) reacts.
+  const isHovered = useStore(
+    (s) => s.hovered === p.key && (s.mode === 'map' ? p.home : s.focus === p.bookcase && s.shelf === p.shelf),
+  );
   const isSelected = useStore((s) => s.selected === p.key && s.focus === p.bookcase && s.shelf === p.shelf);
   const mode = useStore((s) => s.mode);
   const focused = useStore((s) => s.focus === p.bookcase);
@@ -116,6 +124,7 @@ export function Paper({ p, order }) {
   const hover = useStore((s) => s.hover);
   const select = useStore((s) => s.select);
   const setShelf = useStore((s) => s.setShelf);
+  const openFromMap = useStore((s) => s.openFromMap);
 
   const [w, h, d] = p.size;
   const shelfQ = useMemo(() => new THREE.Quaternion().setFromAxisAngle(Y, p.yaw), [p.yaw]);
@@ -124,6 +133,7 @@ export function Paper({ p, order }) {
     () => new THREE.MeshStandardMaterial({ color: p.color, roughness: 0.62, metalness: 0.05 }),
     [p.color],
   );
+  const starColor = useMemo(() => new THREE.Color(p.starColor).multiplyScalar(2.6), [p.starColor]);
   // Box face order: +x (front cover), -x (back cover), +y, -y, +z (spine), -z (fore-edge)
   const materials = useMemo(() => [leather, leather, PAGES, PAGES, leather, PAGES], [leather]);
 
@@ -169,7 +179,7 @@ export function Paper({ p, order }) {
     z = lerp(z, tmp.z, s);
     scale = lerp(scale, 1, s);
 
-    // 4. Library → globe: the books fly into it.
+    // 4. Library → star map around the globe.
     const sp = p.starPos;
     g.position.set(lerp(x, sp[0], t), lerp(y, sp[1], t) + Math.sin(Math.PI * t) * 1.4, lerp(z, sp[2], t));
     g.quaternion.copy(shelfQ).slerp(displayQ, k);
@@ -186,6 +196,16 @@ export function Paper({ p, order }) {
       book.current.rotation.x = Math.sin(time * 0.9) * 0.03 * s;
       book.current.rotation.y = pv * 0.12 * k * (1 - s);
     }
+    if (star.current && p.home) {
+      // Brighter when the globe points at this paper (hovered city / pinned country), dimmer otherwise.
+      const f = mode === 'map' ? focusOf(useStore.getState()) : null;
+      easing.damp(emph.current, 'v', f ? (f.paper(p.key) ? 1.9 : 0.45) : 1, 0.15, dt);
+      const twinkle = 1 + Math.sin(time * 2 + order * 40) * 0.12;
+      const ss = smooth(0.45, 1, t) * p.starSize * twinkle * emph.current.v * (isHovered ? 1.3 : 1);
+      star.current.scale.setScalar(Math.max(ss, 0.0001));
+      star.current.visible = ss > 0.001;
+      halo.current.visible = ss > 0.001;
+    }
   });
 
   const onOver = (e) => {
@@ -199,6 +219,7 @@ export function Paper({ p, order }) {
   const canOpen = onDisplay && !anySelected;
   // A spine still on the shelf: clicking it brings its whole shelf out on display.
   const canSummon = mode === 'library' && focused && !onDisplay && !anySelected;
+  const starActive = mode === 'map' && p.home;
   const spineFont = Math.min(w * 0.4, 0.056);
 
   return (
@@ -262,6 +283,35 @@ export function Paper({ p, order }) {
         )}
         <Cover p={p} w={w} h={h} d={d} />
       </group>
+
+      {/* star */}
+      <mesh
+        ref={(el) => {
+          star.current = el;
+          if (p.home) starObjects[p.key] = el;
+        }}
+        visible={false}
+      >
+        <sphereGeometry args={[1, 16, 16]} />
+        <meshBasicMaterial color={starColor} toneMapped={false} />
+      </mesh>
+      <mesh
+        ref={halo}
+        visible={false}
+        onPointerOver={starActive ? onOver : undefined}
+        onPointerOut={starActive ? onOut : undefined}
+        onClick={
+          starActive
+            ? (e) => {
+                e.stopPropagation();
+                openFromMap(p.key);
+              }
+            : undefined
+        }
+      >
+        <sphereGeometry args={[0.2, 8, 8]} />
+        <meshBasicMaterial transparent opacity={0} depthWrite={false} />
+      </mesh>
 
     </group>
   );

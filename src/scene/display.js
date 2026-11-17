@@ -19,8 +19,8 @@ export function focusPose(bc, aspect) {
   };
 }
 
-const CELL_W = 0.88;
-const CELL_H = 1.5;
+const CELL_W = 0.8;
+const CELL_H = 1.36;
 const cache = new Map();
 
 // The shelf "on display": its books float off the shelf and stand cover-out in a grid that fills
@@ -35,8 +35,8 @@ export function displaySlots(bcId, shelfId, aspect) {
   const hh = D * TAN;
   const hw = hh * aspect;
   // Free region of the view (the heading panel sits left on wide screens, on top on narrow ones).
-  const [u0, u1] = pose.wide ? [-0.2 * hw, 0.95 * hw] : [-0.94 * hw, 0.94 * hw];
-  const [v0, v1] = pose.wide ? [-0.7 * hh, 0.64 * hh] : [-0.62 * hh, 0.36 * hh];
+  const [u0, u1] = pose.wide ? [-0.21 * hw, 0.97 * hw] : [-0.96 * hw, 0.96 * hw];
+  const [v0, v1] = pose.wide ? [-0.74 * hh, 0.63 * hh] : [-0.64 * hh, 0.4 * hh];
   const rw = u1 - u0;
   const rh = v1 - v0;
 
@@ -46,7 +46,7 @@ export function displaySlots(bcId, shelfId, aspect) {
     const s = Math.min(rw / (cols * CELL_W), rh / (rows * CELL_H));
     if (s > best.s + 1e-6) best = { s, cols };
   }
-  const s = Math.min(best.s, 1.85);
+  const s = Math.min(best.s, 2.4);
   const cols = best.cols;
   const rows = Math.ceil(books.length / cols);
   const left = u0 + (rw - cols * CELL_W * s) / 2;
@@ -57,7 +57,7 @@ export function displaySlots(bcId, shelfId, aspect) {
     const c = i % cols;
     const r = Math.floor(i / cols);
     const u = left + (c + 0.5) * CELL_W * s;
-    const v = top - (r + 1) * CELL_H * s + 0.14 * s + (p.size[1] * s) / 2;
+    const v = top - (r + 1) * CELL_H * s + 0.09 * s + (p.size[1] * s) / 2;
     out[p.id] = {
       scale: s,
       pos: [

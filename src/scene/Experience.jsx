@@ -3,7 +3,11 @@ import { Canvas, useFrame, useThree } from '@react-three/fiber';
 import { EffectComposer, Bloom, Vignette } from '@react-three/postprocessing';
 import { easing } from 'maath';
 import * as THREE from 'three';
-import { BOOKS, BOOKCASES, CASE_BY_ID, MAP_CENTER } from '../lib/papers.js';
+import { Billboard, Text } from '@react-three/drei';
+import { PAPERS, BOOKS, LINKS, BOOKCASES, CASE_BY_ID, MAP_CENTER } from '../lib/papers.js';
+import { PAPER_SITES, SITE_PAPERS, focusOf } from '../lib/collab.js';
+import { starObjects, siteObjects } from './registry.js';
+import { FONT } from './fonts.js';
 import { useStore, anim } from '../store.js';
 import { Library } from './Library.jsx';
 import { Paper } from './Paper.jsx';
@@ -23,11 +27,13 @@ function Director() {
 
   useEffect(() => {
     const el = gl.domElement;
-    const down = (e) => (drag.current = { down: true, x: e.clientX });
+    const down = (e) => (drag.current = { down: true, x: e.clientX, y: e.clientY });
     const move = (e) => {
       if (!drag.current.down || useStore.getState().mode !== 'map') return;
       anim.dragV += (e.clientX - drag.current.x) * 0.0006;
+      anim.dragVy += (e.clientY - drag.current.y) * 0.0006;
       drag.current.x = e.clientX;
+      drag.current.y = e.clientY;
     };
     const up = () => (drag.current.down = false);
     el.addEventListener('pointerdown', down);
@@ -50,10 +56,14 @@ function Director() {
     anim.map = target > anim.map ? Math.min(target, anim.map + step) : Math.max(target, anim.map - step);
 
     if (mode === 'map') {
+      // Sideways drags turn the star clusters and the globe; up/down drags tip the globe only.
+      anim.dYaw = anim.dragV;
+      anim.dPitch = anim.dragVy;
       anim.rotY += dt * 0.05 + anim.dragV;
       anim.dragV *= 0.92;
+      anim.dragVy *= 0.92;
     } else {
-      anim.dragV = 0;
+      anim.dragV = anim.dragVy = anim.dYaw = anim.dPitch = 0;
       const goal = Math.round(anim.rotY / (Math.PI * 2)) * Math.PI * 2;
       anim.rotY = THREE.MathUtils.damp(anim.rotY, goal, 3, dt);
     }
@@ -89,7 +99,7 @@ function CameraRig() {
       pos = [0, 4.2, 22];
       look.copy(OVERVIEW_LOOK);
     } else if (mode === 'map') {
-      const mapFit = Math.max(17, 15 / aspect);
+      const mapFit = Math.max(19, 16 / aspect);
       // A pinned country opens a panel on the left: slide the view so the globe sits beside it.
       const off = useStore.getState().country && aspect > 1.1 ? -Math.min(4.2, mapFit * TAN * aspect * 0.42) : 0;
       pos = [MAP_CENTER[0] + off + px * 1.2, MAP_CENTER[1] + 1.6 + py * 1.2, MAP_CENTER[2] + mapFit];
@@ -119,7 +129,7 @@ function CameraRig() {
   return null;
 }
 
-// The library lives in here; on the globe view it turns with the globe.
+// Everything lives in here; on the star map it turns (with the globe) around the map centre.
 function World({ children }) {
   const outer = useRef();
   const inner = useRef();
@@ -133,6 +143,99 @@ function World({ children }) {
     <group ref={outer}>
       <group ref={inner}>{children}</group>
     </group>
+  );
+}
+
+// Faint lines between papers that share co-authors.
+function Links() {
+  const ref = useRef();
+  const geom = useMemo(() => {
+    const pos = new Float32Array(LINKS.length * 6);
+    LINKS.forEach((l, i) => {
+      pos.set(PAPERS[l.a].starPos, i * 6);
+      pos.set(PAPERS[l.b].starPos, i * 6 + 3);
+    });
+    const g = new THREE.BufferGeometry();
+    g.setAttribute('position', new THREE.BufferAttribute(pos, 3));
+    return g;
+  }, []);
+  useFrame(() => {
+    const o = THREE.MathUtils.smoothstep(anim.map, 0.85, 1);
+    const f = focusOf(useStore.getState());
+    ref.current.material.opacity = o * (f ? 0.04 : 0.09);
+    ref.current.visible = o > 0.01;
+  });
+  return (
+    <lineSegments ref={ref} geometry={geom}>
+      <lineBasicMaterial color="#a9c1ff" transparent opacity={0} depthWrite={false} />
+    </lineSegments>
+  );
+}
+
+function ClusterLabels() {
+  const refs = useRef([]);
+  useFrame(() => {
+    const o = THREE.MathUtils.smoothstep(anim.map, 0.8, 1);
+    refs.current.forEach((t) => {
+      if (!t) return;
+      t.fillOpacity = o;
+      t.visible = o > 0.01;
+    });
+  });
+  return BOOKCASES.map((bc, i) => (
+    <Billboard key={bc.id} position={[bc.starCenter[0], bc.starCenter[1] + bc.starRadius * 0.8 + 0.5, bc.starCenter[2]]}>
+      <Text ref={(el) => (refs.current[i] = el)} font={FONT} fontSize={0.32} letterSpacing={0.08} color={bc.star} anchorX="center" anchorY="middle">
+        {bc.name}
+      </Text>
+    </Billboard>
+  ));
+}
+
+// Threads from paper stars down to the cities they were written with: for the hovered star, or
+// for every paper of the hovered city / pinned country.
+const MAX_THREADS = 400;
+const _a = new THREE.Vector3();
+const _b = new THREE.Vector3();
+function Threads() {
+  const ref = useRef();
+  const geom = useMemo(() => {
+    const g = new THREE.BufferGeometry();
+    g.setAttribute('position', new THREE.BufferAttribute(new Float32Array(MAX_THREADS * 6), 3));
+    g.setAttribute('color', new THREE.BufferAttribute(new Float32Array(MAX_THREADS * 6), 3));
+    return g;
+  }, []);
+  useFrame((state, dt) => {
+    const st = useStore.getState();
+    const o = THREE.MathUtils.smoothstep(anim.map, 0.9, 1);
+    const pairs = [];
+    if (st.mode === 'map' && o > 0.01) {
+      if (st.hoveredSite) SITE_PAPERS[st.hoveredSite].forEach((id) => pairs.push([id, st.hoveredSite]));
+      else if (st.hovered) (PAPER_SITES[st.hovered] || []).forEach((sid) => pairs.push([st.hovered, sid]));
+    }
+    const pos = geom.attributes.position.array;
+    const col = geom.attributes.color.array;
+    let n = 0;
+    for (const [id, sid] of pairs) {
+      const a = starObjects[id];
+      const b = siteObjects[sid];
+      if (!a || !b || n >= MAX_THREADS) continue;
+      a.getWorldPosition(_a);
+      b.getWorldPosition(_b);
+      pos.set([_a.x, _a.y, _a.z, _b.x, _b.y, _b.z], n * 6);
+      // Bright at the star, fading towards the city.
+      col.set([1.5, 1.5, 1.6, 0.35, 0.35, 0.4], n * 6);
+      n++;
+    }
+    geom.setDrawRange(0, n * 2);
+    geom.attributes.position.needsUpdate = true;
+    geom.attributes.color.needsUpdate = true;
+    ref.current.visible = n > 0;
+    ref.current.material.opacity = THREE.MathUtils.damp(ref.current.material.opacity, n ? o * 0.7 : 0, 8, dt);
+  });
+  return (
+    <lineSegments ref={ref} geometry={geom} frustumCulled={false}>
+      <lineBasicMaterial vertexColors transparent opacity={0} depthWrite={false} blending={THREE.AdditiveBlending} toneMapped={false} />
+    </lineSegments>
   );
 }
 
@@ -235,9 +338,12 @@ export function Experience() {
         {BOOKS.map((b) => (
           <Paper key={b.id} p={b} order={orders[b.id]} />
         ))}
+        <Links />
+        <ClusterLabels />
         <DisplayLight />
       </World>
       <Globe />
+      <Threads />
       <StarDust />
       <EffectComposer multisampling={4}>
         <Bloom mipmapBlur luminanceThreshold={1} intensity={1.0} radius={0.7} />

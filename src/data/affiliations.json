@@ -1,0 +1,608 @@
+{
+ "home": "technical-university-of-munich",
+ "institutions": {
+  "beijing-institute-of-technology": {
+   "name": "Beijing Institute of Technology",
+   "city": "Beijing",
+   "country": "China",
+   "iso": "156",
+   "lat": 39.959,
+   "lon": 116.31
+  },
+  "east-china-university-of-science-and-technology": {
+   "name": "East China University of Science and Technology",
+   "city": "Shanghai",
+   "country": "China",
+   "iso": "156",
+   "lat": 31.143,
+   "lon": 121.426
+  },
+  "eindhoven-university-of-technology": {
+   "name": "Eindhoven University of Technology",
+   "city": "Eindhoven",
+   "country": "Netherlands",
+   "iso": "528",
+   "lat": 51.448,
+   "lon": 5.49
+  },
+  "eth-zurich": {
+   "name": "ETH Zurich",
+   "city": "Zurich",
+   "country": "Switzerland",
+   "iso": "756",
+   "lat": 47.367,
+   "lon": 8.55
+  },
+  "freie-universitat-berlin": {
+   "name": "Freie Universität Berlin",
+   "city": "Berlin",
+   "country": "Germany",
+   "iso": "276",
+   "lat": 52.524,
+   "lon": 13.411
+  },
+  "harbin-engineering-university": {
+   "name": "Harbin Engineering University",
+   "city": "Harbin",
+   "country": "China",
+   "iso": "156",
+   "lat": 45.776,
+   "lon": 126.682
+  },
+  "harbin-institute-of-technology": {
+   "name": "Harbin Institute of Technology",
+   "city": "Harbin",
+   "country": "China",
+   "iso": "156",
+   "lat": 45.744,
+   "lon": 126.631
+  },
+  "hong-kong-polytechnic-university": {
+   "name": "Hong Kong Polytechnic University",
+   "city": "Hong Kong",
+   "country": "China",
+   "iso": "156",
+   "lat": 22.278,
+   "lon": 114.175
+  },
+  "mohamed-bin-zayed-university-of-artificial-intelligence": {
+   "name": "Mohamed bin Zayed University of Artificial Intelligence",
+   "city": "Abu Dhabi",
+   "country": "United Arab Emirates",
+   "iso": "784",
+   "lat": 24.451,
+   "lon": 54.397
+  },
+  "national-university-of-singapore": {
+   "name": "National University of Singapore",
+   "city": "Singapore",
+   "country": "Singapore",
+   "iso": "702",
+   "lat": 1.2966,
+   "lon": 103.7764
+  },
+  "northeast-forestry-university": {
+   "name": "Northeast Forestry University",
+   "city": "Harbin",
+   "country": "China",
+   "iso": "156",
+   "lat": 45.722,
+   "lon": 126.636
+  },
+  "robert-koch-institute": {
+   "name": "Robert Koch Institute",
+   "city": "Berlin",
+   "country": "Germany",
+   "iso": "276",
+   "lat": 52.539,
+   "lon": 13.346
+  },
+  "taiyuan-university-of-science-and-technology": {
+   "name": "Taiyuan University of Science and Technology",
+   "city": "Taiyuan",
+   "country": "China",
+   "iso": "156",
+   "lat": 37.869,
+   "lon": 112.56
+  },
+  "technical-university-of-munich": {
+   "name": "Technical University of Munich",
+   "city": "Munich",
+   "country": "Germany",
+   "iso": "276",
+   "lat": 48.149,
+   "lon": 11.568
+  },
+  "the-hong-kong-university-of-science-and-technology": {
+   "name": "The Hong Kong University of Science and Technology",
+   "city": "Hong Kong",
+   "country": "China",
+   "iso": "156",
+   "lat": 22.278,
+   "lon": 114.175
+  },
+  "the-hong-kong-university-of-science-and-technology-guangzhou": {
+   "name": "The Hong Kong University of Science and Technology (Guangzhou)",
+   "city": "Guangzhou",
+   "country": "China",
+   "iso": "156",
+   "lat": 22.896,
+   "lon": 113.478
+  },
+  "the-university-of-adelaide": {
+   "name": "The University of Adelaide",
+   "city": "Adelaide",
+   "country": "Australia",
+   "iso": "036",
+   "lat": -34.919,
+   "lon": 138.604
+  },
+  "the-university-of-texas-at-austin": {
+   "name": "The University of Texas at Austin",
+   "city": "Austin",
+   "country": "United States",
+   "iso": "840",
+   "lat": 30.267,
+   "lon": -97.743
+  },
+  "tongji-university": {
+   "name": "Tongji University",
+   "city": "Shanghai",
+   "country": "China",
+   "iso": "156",
+   "lat": 31.283,
+   "lon": 121.502
+  },
+  "university-of-california-riverside": {
+   "name": "University of California, Riverside",
+   "city": "Riverside",
+   "country": "United States",
+   "iso": "840",
+   "lat": 33.974,
+   "lon": -117.328
+  },
+  "university-of-edinburgh": {
+   "name": "University of Edinburgh",
+   "city": "Edinburgh",
+   "country": "United Kingdom",
+   "iso": "826",
+   "lat": 55.944,
+   "lon": -3.188
+  },
+  "university-of-nottingham": {
+   "name": "University of Nottingham",
+   "city": "Nottingham",
+   "country": "United Kingdom",
+   "iso": "826",
+   "lat": 52.938,
+   "lon": -1.195
+  }
+ },
+ "papers": {
+  "yang_TRO2026_uniconflow": [[[
+     "technical-university-of-munich"], "paper"],
+   [["technical-university-of-munich"], "paper"],
+   [["technical-university-of-munich"], "paper"],
+   [["tongji-university"], "override"],
+   [["technical-university-of-munich"], "paper"],
+   [["technical-university-of-munich"], "paper"],
+   [["mohamed-bin-zayed-university-of-artificial-intelligence"], "paper"]
+  ],
+  "Yang_AAAI2026_SkyGP": [[[
+     "technical-university-of-munich"], "paper"],
+   [["technical-university-of-munich"], "paper"],
+   [["technical-university-of-munich"], "paper"],
+   [["technical-university-of-munich"], "paper"],
+   [["technical-university-of-munich"], "paper"],
+   [["technical-university-of-munich"], "paper"],
+   [["technical-university-of-munich"], "paper"],
+   [["mohamed-bin-zayed-university-of-artificial-intelligence"], "paper"]
+  ],
+  "yang_JAS2026_qualityorquantity": [[[
+     "technical-university-of-munich"], "paper"],
+   [["technical-university-of-munich"], "paper"],
+   [["harbin-engineering-university"], "paper"],
+   [["harbin-engineering-university"], "paper"],
+   [["the-university-of-adelaide"], "paper"]
+  ],
+  "yang_JAAMAS2026_whomtotrust": [[[
+     "technical-university-of-munich"], "paper"],
+   [["technical-university-of-munich"], "paper"],
+   [["robert-koch-institute",
+     "freie-universitat-berlin"], "paper"],
+   [["technical-university-of-munich"], "paper"],
+   [["technical-university-of-munich"], "paper"],
+   [["robert-koch-institute",
+     "freie-universitat-berlin"], "paper"],
+   [["technical-university-of-munich"], "paper"]
+  ],
+  "zhuang2026safeconsensuscooperativemanipulation": [[[
+     "technical-university-of-munich"], "hand"],
+   [["technical-university-of-munich"], "hand"],
+   [["technical-university-of-munich"], "hand"]
+  ],
+  "yu2026safenightvlaseeingunseen": [[[
+     "technical-university-of-munich"], "hand"],
+   [["technical-university-of-munich"], "hand"],
+   [["technical-university-of-munich"], "hand"],
+   [["technical-university-of-munich"], "hand"],
+   [["technical-university-of-munich"], "hand"]
+  ],
+  "Deng_IFAC2026_residual": [[[
+     "technical-university-of-munich"], "paper"],
+   [["technical-university-of-munich"], "paper"]
+  ],
+  "li_ICRA_2026_RCM": [[[
+     "technical-university-of-munich"], "paper"],
+   [["technical-university-of-munich"], "paper"],
+   [["technical-university-of-munich"], "paper"],
+   [["technical-university-of-munich"], "paper"],
+   [["mohamed-bin-zayed-university-of-artificial-intelligence"], "paper"]
+  ],
+  "huang_ICRA2026_contactsafe": [[[
+     "technical-university-of-munich"], "paper"],
+   [["university-of-nottingham"], "paper"],
+   [["technical-university-of-munich"], "paper"],
+   [["technical-university-of-munich"], "paper"],
+   [["university-of-nottingham"], "paper"]
+  ],
+  "Yin_JSTSP_2026_gpreg": [[[
+     "the-hong-kong-university-of-science-and-technology",
+     "the-hong-kong-university-of-science-and-technology-guangzhou"], "paper"],
+   [["technical-university-of-munich"], "paper"],
+   [["technical-university-of-munich"], "paper"],
+   [["the-hong-kong-university-of-science-and-technology-guangzhou"], "paper"],
+   [["university-of-edinburgh"], "paper"],
+   [["technical-university-of-munich"], "paper"],
+   [["the-hong-kong-university-of-science-and-technology-guangzhou"], "override"]
+  ],
+  "yang_arXiv2026_coingp": [[[
+     "technical-university-of-munich"], "paper"],
+   [["technical-university-of-munich"], "paper"],
+   [["the-hong-kong-university-of-science-and-technology-guangzhou"], "paper"],
+   [["the-hong-kong-university-of-science-and-technology-guangzhou"], "override"],
+   [["tongji-university"], "override"],
+   [["hong-kong-polytechnic-university"], "paper"]
+  ],
+  "dai_arXiv2026_etnetworked": [[[
+     "technical-university-of-munich"], "paper"],
+   [["technical-university-of-munich"], "paper"],
+   [["technical-university-of-munich"], "hand"],
+   [["technical-university-of-munich"], "paper"],
+   [["eindhoven-university-of-technology"], "hand"],
+   [["east-china-university-of-science-and-technology"], "paper"],
+   [["technical-university-of-munich"], "hand"]
+  ],
+  "dai_TUM2026_resilientdos": [[[
+     "technical-university-of-munich"], "hand"],
+   [["technical-university-of-munich"], "hand"],
+   [["technical-university-of-munich"], "hand"],
+   [["technical-university-of-munich"], "hand"],
+   [["the-hong-kong-university-of-science-and-technology-guangzhou"], "override"],
+   [["technical-university-of-munich"], "hand"]
+  ],
+  "dai_arXiv2026_asyncmultirobot": [[[
+     "technical-university-of-munich"], "paper"],
+   [["technical-university-of-munich"], "hand"],
+   [["university-of-california-riverside"], "override"],
+   [["technical-university-of-munich"], "paper"]
+  ],
+  "yang_AAAI2025_Asynchronous": [[[
+     "technical-university-of-munich"], "paper"],
+   [["technical-university-of-munich"], "paper"],
+   [["technical-university-of-munich"], "paper"]
+  ],
+  "yang_EAAI2025_safe": [[[
+     "technical-university-of-munich"], "paper"],
+   [["technical-university-of-munich"], "paper"],
+   [["harbin-engineering-university"], "paper"],
+   [["harbin-engineering-university"], "paper"],
+   [["harbin-engineering-university"], "paper"]
+  ],
+  "Dai_TNNLS2025_cooperative": [[[
+     "technical-university-of-munich"], "paper"],
+   [["technical-university-of-munich"], "paper"],
+   [["technical-university-of-munich"], "paper"],
+   [["beijing-institute-of-technology"], "paper"],
+   [["beijing-institute-of-technology"], "paper"],
+   [["technical-university-of-munich"], "paper"]
+  ],
+  "Yin_TMECH_2025_torqueinducedovershoot": [[[
+     "the-hong-kong-university-of-science-and-technology-guangzhou"], "paper"],
+   [["technical-university-of-munich"], "paper"],
+   [["technical-university-of-munich"], "paper"],
+   [["the-hong-kong-university-of-science-and-technology-guangzhou"], "paper"],
+   [["the-hong-kong-university-of-science-and-technology-guangzhou"], "paper"],
+   [["the-hong-kong-university-of-science-and-technology-guangzhou"], "paper"],
+   [["the-hong-kong-university-of-science-and-technology-guangzhou"], "override"]
+  ],
+  "yang_arXiv2025_prompt2auto": [[[
+     "technical-university-of-munich"], "hand"],
+   [["technical-university-of-munich"], "hand"],
+   [["technical-university-of-munich"], "hand"],
+   [["technical-university-of-munich"], "hand"],
+   [["national-university-of-singapore"], "hand"],
+   [["technical-university-of-munich"], "hand"],
+   [["technical-university-of-munich"], "hand"],
+   [["technical-university-of-munich"], "hand"]
+  ],
+  "dai_arXiv2025_safeflow": [[[
+     "technical-university-of-munich"], "paper"],
+   [["technical-university-of-munich"], "paper"],
+   [["technical-university-of-munich"], "paper"],
+   [["technical-university-of-munich"], "paper"],
+   [["technical-university-of-munich"], "hand"],
+   [["technical-university-of-munich"], "paper"],
+   [["technical-university-of-munich"], "paper"]
+  ],
+  "Yang_AAMAS_2024_whomtotrust": [[[
+     "technical-university-of-munich"], "hand"],
+   [["technical-university-of-munich"], "hand"],
+   [["robert-koch-institute"], "hand"],
+   [["technical-university-of-munich"], "hand"],
+   [["robert-koch-institute",
+     "freie-universitat-berlin"], "override"]
+  ],
+  "Yang_ACC_2024_cooperative": [[[
+     "robert-koch-institute"], "paper"],
+   [["technical-university-of-munich"], "paper"],
+   [["eth-zurich"], "paper"],
+   [["technical-university-of-munich"], "paper"],
+   [["the-university-of-texas-at-austin"], "paper"],
+   [["technical-university-of-munich"], "paper"],
+   [["robert-koch-institute",
+     "freie-universitat-berlin"], "override"],
+   [["technical-university-of-munich"], "paper"]
+  ],
+  "Yang_CCC_2024_kernelbased": [[[
+     "robert-koch-institute"], "paper"],
+   [["technical-university-of-munich"], "paper"],
+   [["taiyuan-university-of-science-and-technology"], "paper"],
+   [["robert-koch-institute"], "paper"],
+   [["robert-koch-institute"], "paper"],
+   [["robert-koch-institute",
+     "freie-universitat-berlin"], "override"]
+  ],
+  "DAI2024101058": [[[
+     "technical-university-of-munich"], "paper"],
+   [["technical-university-of-munich"], "paper"],
+   [["technical-university-of-munich"], "paper"],
+   [["beijing-institute-of-technology"], "paper"],
+   [["harbin-institute-of-technology"], "paper"],
+   [["robert-koch-institute",
+     "freie-universitat-berlin"], "override"],
+   [["technical-university-of-munich"], "paper"]
+  ],
+  "dai_arXiv2024_gpgym": [[[
+     "technical-university-of-munich"], "hand"],
+   [["technical-university-of-munich"], "hand"]
+  ],
+  "Lederer_TAC_2023_cooperative": [[[
+     "technical-university-of-munich"], "paper"],
+   [["harbin-engineering-university",
+     "technical-university-of-munich"], "paper"],
+   [["technical-university-of-munich"], "paper"],
+   [["technical-university-of-munich"], "paper"]
+  ],
+  "dai_L4DC2023_can": [[[
+     "technical-university-of-munich"], "hand"],
+   [["technical-university-of-munich"], "hand"],
+   [["technical-university-of-munich"], "hand"],
+   [["technical-university-of-munich"], "hand"]
+  ],
+  "Yin_IECON_2023_learningbased": [[[
+     "the-hong-kong-university-of-science-and-technology-guangzhou"], "paper"],
+   [["technical-university-of-munich"], "paper"],
+   [["robert-koch-institute"], "paper"],
+   [["the-hong-kong-university-of-science-and-technology-guangzhou"], "paper"],
+   [["robert-koch-institute",
+     "freie-universitat-berlin"], "override"],
+   [["the-hong-kong-university-of-science-and-technology-guangzhou"], "override"]
+  ],
+  "Yang_CDC_2021_distributedlearning": [[[
+     "harbin-engineering-university",
+     "technical-university-of-munich"], "paper"],
+   [["technical-university-of-munich"], "paper"],
+   [["technical-university-of-munich"], "paper"],
+   [["technical-university-of-munich"], "paper"],
+   [["technical-university-of-munich"], "paper"],
+   [["technical-university-of-munich"], "paper"]
+  ],
+  "YAN_OE_2020_pathtracking": [[[
+     "harbin-engineering-university"], "paper"],
+   [["harbin-engineering-university"], "paper"],
+   [["harbin-engineering-university"], "paper"],
+   [["harbin-engineering-university"], "paper"],
+   [["harbin-engineering-university"], "paper"]
+  ],
+  "YAN_OE_2019_coordinatedcontrol": [[[
+     "harbin-engineering-university"], "paper"],
+   [["harbin-engineering-university"], "paper"],
+   [["harbin-engineering-university"], "paper"],
+   [["harbin-engineering-university"], "paper"],
+   [["northeast-forestry-university"], "paper"],
+   [["harbin-engineering-university"], "paper"]
+  ],
+  "Yan_OCEANS_2019_coordinatedcontrol": [[[
+     "harbin-engineering-university"], "paper"],
+   [["harbin-engineering-university"], "paper"],
+   [["harbin-engineering-university"], "paper"],
+   [["harbin-engineering-university"], "paper"],
+   [["harbin-engineering-university"], "override"],
+   [["harbin-engineering-university"], "paper"]
+  ],
+  "Yan_CCC_2019_divingcontrol": [[[
+     "harbin-engineering-university"], "paper"],
+   [["harbin-engineering-university"], "paper"],
+   [["harbin-engineering-university"], "paper"],
+   [["harbin-engineering-university"], "paper"],
+   [["harbin-engineering-university"], "paper"],
+   [["harbin-engineering-university"], "paper"]
+  ],
+  "Yan_IECON_2018_pathtracking": [[[
+     "harbin-engineering-university"], "paper"],
+   [["harbin-engineering-university"], "paper"],
+   [["harbin-engineering-university"], "paper"],
+   [["harbin-engineering-university"], "paper"],
+   [["harbin-engineering-university"], "paper"],
+   [["harbin-engineering-university"], "override"]
+  ],
+  "Yan_CCC_2018_pathtracking": [[[
+     "harbin-engineering-university"], "paper"],
+   [["harbin-engineering-university"], "paper"],
+   [["harbin-engineering-university"], "paper"],
+   [["harbin-engineering-university"], "paper"],
+   [["northeast-forestry-university"], "paper"]
+  ],
+  "Hattab_NLPIR2024_personastrategies": [[[
+     "robert-koch-institute",
+     "freie-universitat-berlin"], "override"],
+   [["robert-koch-institute"], "paper"],
+   [["robert-koch-institute",
+     "freie-universitat-berlin"], "paper"],
+   [["robert-koch-institute"], "paper"],
+   [["robert-koch-institute"], "paper"],
+   [["robert-koch-institute"], "paper"]
+  ],
+  "dubey_EXPLIMED2024_storytelling": [[[
+     "robert-koch-institute"], "hand"],
+   [["technical-university-of-munich"], "hand"],
+   [["robert-koch-institute",
+     "freie-universitat-berlin"], "override"]
+  ],
+  "Yan_CCC_2022_coordinatedcontrol": [[[
+     "harbin-engineering-university"], "paper"],
+   [["harbin-engineering-university"], "paper"],
+   [["harbin-engineering-university"], "paper"]
+  ],
+  "Yan_CCC_2021_leaderfollowing": [[[
+     "harbin-engineering-university"], "paper"],
+   [["harbin-engineering-university"], "paper"],
+   [["harbin-engineering-university"], "paper"]
+  ],
+  "Zhou_CCC_2019_timedelaystatefeedback": [[[
+     "harbin-engineering-university"], "paper"],
+   [["harbin-engineering-university"], "paper"],
+   [["harbin-engineering-university"], "paper"],
+   [["harbin-engineering-university"], "paper"]
+  ],
+  "Yan_CCC_2018_transversalnavigation": [[[
+     "harbin-engineering-university"], "paper"],
+   [["harbin-engineering-university"], "paper"],
+   [["harbin-engineering-university"], "override"],
+   [["harbin-engineering-university"], "paper"],
+   [["harbin-engineering-university"], "override"]
+  ],
+  "Du_OCEANS_2019_recoverycontroller": [[[
+     "harbin-engineering-university"], "paper"],
+   [["harbin-engineering-university"], "paper"],
+   [["harbin-engineering-university"], "paper"],
+   [["harbin-engineering-university"], "paper"],
+   [["harbin-engineering-university"], "paper"]
+  ],
+  "Yan_ACCESS_2019_trajectory": [[[
+     "harbin-engineering-university"], "paper"],
+   [["harbin-engineering-university"], "paper"],
+   [["harbin-engineering-university"], "paper"],
+   [["harbin-engineering-university"], "paper"],
+   [["harbin-engineering-university"], "paper"],
+   [["harbin-engineering-university"], "paper"]
+  ],
+  "gomez2025holistic": [[[
+     "robert-koch-institute"], "override"],
+   [["robert-koch-institute"], "paper"],
+   [["robert-koch-institute"], "paper"],
+   [["robert-koch-institute"], "paper"],
+   [["robert-koch-institute"], "paper"],
+   [["robert-koch-institute"], "paper"],
+   [["robert-koch-institute"], "paper"],
+   [["robert-koch-institute",
+     "freie-universitat-berlin"], "override"],
+   [["robert-koch-institute"], "override"],
+   [["robert-koch-institute"], "paper"]
+  ],
+  "dubey_STARProtocols2025_protocol": [[[
+     "robert-koch-institute",
+     "freie-universitat-berlin"], "paper"],
+   [["robert-koch-institute"], "paper"],
+   [["robert-koch-institute"], "paper"],
+   [["robert-koch-institute",
+     "freie-universitat-berlin"], "override"]
+  ],
+  "WECKBECKER20242326": [[[
+     "robert-koch-institute"], "paper"],
+   [["robert-koch-institute"], "paper"],
+   [["robert-koch-institute"], "paper"],
+   [["robert-koch-institute",
+     "freie-universitat-berlin"], "override"]
+  ],
+  "dubey_iScience2024_nestedmodel": [[[
+     "robert-koch-institute",
+     "freie-universitat-berlin"], "paper"],
+   [["robert-koch-institute"], "paper"],
+   [["robert-koch-institute",
+     "freie-universitat-berlin"], "override"]
+  ],
+  "Yan_ACCESS_2021_multilevelthresholding": [[[
+     "harbin-engineering-university"], "paper"],
+   [["harbin-engineering-university"], "paper"],
+   [["harbin-engineering-university"], "paper"],
+   [["harbin-engineering-university"], "paper"]
+  ],
+  "Yan_ACCESS_2019_formation": [[[
+     "harbin-engineering-university"], "paper"],
+   [["harbin-engineering-university"], "paper"],
+   [["harbin-engineering-university"], "paper"],
+   [["harbin-engineering-university"], "paper"]
+  ],
+  "Yan_CPE_2021_pathplanning": [[[
+     "harbin-engineering-university"], "paper"],
+   [["harbin-engineering-university"], "paper"],
+   [["harbin-engineering-university"], "paper"],
+   [["harbin-engineering-university"], "paper"]
+  ],
+  "Yan_ACCESS_2019_finealignment": [[[
+     "harbin-engineering-university"], "paper"],
+   [["harbin-engineering-university"], "paper"],
+   [["harbin-engineering-university"], "override"],
+   [["harbin-engineering-university"], "paper"],
+   [["harbin-engineering-university"], "paper"]
+  ],
+  "Yan_ACCESS_2018_pathplanning": [[[
+     "harbin-engineering-university"], "paper"],
+   [["harbin-engineering-university"], "override"],
+   [["harbin-engineering-university"], "paper"],
+   [["harbin-engineering-university"], "paper"]
+  ],
+  "Yan_SENSORS_2018_polarcooperative": [[[
+     "harbin-engineering-university"], "paper"],
+   [["harbin-engineering-university"], "paper"],
+   [["harbin-engineering-university"], "override"],
+   [["harbin-engineering-university"], "paper"],
+   [["harbin-engineering-university"], "paper"],
+   [["harbin-engineering-university"], "paper"]
+  ],
+  "Zhou_ACCESS_2019_trajectorytracking": [[[
+     "harbin-engineering-university"], "paper"],
+   [["harbin-engineering-university"], "paper"],
+   [["harbin-engineering-university"], "paper"],
+   [["harbin-engineering-university"], "paper"],
+   [["harbin-engineering-university"], "paper"]
+  ],
+  "Yan_SENSORS_2018_polarinitialalignment": [[[
+     "harbin-engineering-university"], "paper"],
+   [["harbin-engineering-university"], "paper"],
+   [["harbin-engineering-university"], "override"],
+   [["harbin-engineering-university"], "paper"],
+   [["harbin-engineering-university"], "paper"]
+  ],
+  "Zhang_ACCESS_2019_consensuscontrol": [[[
+     "harbin-engineering-university"], "paper"],
+   [["harbin-engineering-university"], "paper"],
+   [["harbin-engineering-university"], "paper"],
+   [["harbin-engineering-university"], "paper"],
+   [["harbin-engineering-university"], "override"],
+   [["harbin-engineering-university"], "paper"]
+  ]
+ }
+}
