@@ -133,9 +133,18 @@ export function IndexNav() {
   const hoverCase = useStore((s) => s.hoverCase);
   const country = useStore((s) => s.country);
   const pickCountry = useStore((s) => s.pickCountry);
+  // Publish the footer's height so side panels can stop above it (it wraps on narrow screens).
+  const ref = useRef();
+  useEffect(() => {
+    const el = ref.current;
+    if (!el) return;
+    const ro = new ResizeObserver(() => document.documentElement.style.setProperty('--nav-h', `${el.offsetHeight}px`));
+    ro.observe(el);
+    return () => ro.disconnect();
+  }, [mode]);
   if (mode === 'map')
     return (
-      <footer className="indexnav">
+      <footer className="indexnav" ref={ref}>
         <div className="index-items compact">
           <span className="index-lead">
             <b>{COLLABORATOR_COUNT}</b> co-authors · <b>{COUNTRIES.length}</b> countries
