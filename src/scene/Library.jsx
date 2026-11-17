@@ -16,8 +16,11 @@ function useRoomMaterials() {
       wood: m({ color: '#3d2617', roughness: 0.72 }),
       woodDark: m({ color: '#1f140c', roughness: 0.9 }),
       brass: m({ color: '#c9a24e', emissive: '#3b2a0c', metalness: 0.75, roughness: 0.32 }),
-      // Shelf plates: the same brass, glowing a little so the engraving reads in the dim room.
-      plate: m({ color: '#d4ad57', emissive: '#7a5a1a', metalness: 0.7, roughness: 0.3 }),
+      // Shelf label holders, as in an old library: tarnished brass around an aged paper card.
+      // The card glows faintly so its lettering reads in the dim room.
+      holder: m({ color: '#8a6a2c', emissive: '#22170a', metalness: 0.85, roughness: 0.5 }),
+      card: m({ color: '#e4d5ad', emissive: '#6e6142', roughness: 0.95 }),
+      screw: m({ color: '#5e4a22', emissive: '#150e05', metalness: 0.9, roughness: 0.4 }),
       wall: m({ color: '#17110d', roughness: 1, side: THREE.BackSide }),
       panel: m({ color: '#1d1510', roughness: 0.95 }),
       rug: m({ color: '#3b1c18', roughness: 1 }),
@@ -114,6 +117,56 @@ function Bookend({ x, y, mats }) {
 }
 
 // Fill the space after the books with a bookend and a few objects, so shelves look lived-in.
+// A library shelf label: a tarnished brass holder screwed to the shelf edge, with a paper card
+// slipped into it that names the sub-topic.
+const SCREW = new THREE.CylinderGeometry(0.022, 0.022, 0.012, 14);
+function ShelfLabel({ shelf, mats, texts, position }) {
+  const w = Math.max(1.7, shelf.name.length * 0.078 + 0.56); // card width
+  const tab = 0.13; // brass tab at each end, for the screw
+  return (
+    <group position={position}>
+      {/* back plate */}
+      <mesh material={mats.holder}>
+        <boxGeometry args={[w + tab * 2, 0.17, 0.008]} />
+      </mesh>
+      {/* paper card */}
+      <mesh material={mats.card} position={[0, 0, 0.006]}>
+        <boxGeometry args={[w, 0.128, 0.004]} />
+      </mesh>
+      {/* rails that hold the card, top and bottom */}
+      {[-1, 1].map((k) => (
+        <mesh key={k} material={mats.holder} position={[0, k * 0.073, 0.01]}>
+          <boxGeometry args={[w + 0.03, 0.022, 0.014]} />
+        </mesh>
+      ))}
+      {/* end stops and screws */}
+      {[-1, 1].map((k) => (
+        <group key={k} position={[k * (w / 2 + tab / 2), 0, 0]}>
+          <mesh material={mats.holder} position={[-k * (tab / 2 - 0.008), 0, 0.01]}>
+            <boxGeometry args={[0.016, 0.168, 0.014]} />
+          </mesh>
+          <mesh material={mats.screw} geometry={SCREW} position={[k * 0.012, 0, 0.008]} rotation={[Math.PI / 2, 0, 0]} />
+          <mesh material={mats.woodDark} position={[k * 0.012, 0, 0.0145]} rotation={[0, 0, 0.6]}>
+            <boxGeometry args={[0.034, 0.005, 0.001]} />
+          </mesh>
+        </group>
+      ))}
+      <Text
+        ref={(el) => el && texts.add(el)}
+        font={FONT}
+        position={[0, -0.002, 0.0095]}
+        fontSize={0.094}
+        letterSpacing={0.08}
+        anchorX="center"
+        anchorY="middle"
+        color="#2e1e10"
+      >
+        {`${shelf.name.toUpperCase()}  ·  ${shelf.count}`}
+      </Text>
+    </group>
+  );
+}
+
 function RowDecor({ bc, row, r, mats }) {
   const right = CASE.width / 2 - 0.1;
   const rnd = rand(`${bc.id}-${r}-decor`);
@@ -202,23 +255,7 @@ function Bookcase({ bc, mats, texts }) {
       {bc.rows.map((row, r) => (
         <group key={r}>
           {row.shelf && (
-            <group position={[0, boardY(rows - 1 - r), D / 2 + 0.004]}>
-              <mesh material={mats.plate}>
-                <boxGeometry args={[Math.max(1.7, row.shelf.name.length * 0.078 + 0.56), 0.15, 0.008]} />
-              </mesh>
-              <Text
-                ref={(el) => el && texts.add(el)}
-                font={FONT}
-                position={[0, -0.002, 0.006]}
-                fontSize={0.1}
-                letterSpacing={0.09}
-                anchorX="center"
-                anchorY="middle"
-                color="#1c1006"
-              >
-                {`${row.shelf.name.toUpperCase()}  ·  ${row.shelf.count}`}
-              </Text>
-            </group>
+            <ShelfLabel shelf={row.shelf} mats={mats} texts={texts} position={[0, boardY(rows - 1 - r), D / 2 + 0.004]} />
           )}
           <RowDecor bc={bc} row={row} r={r} mats={mats} />
         </group>
