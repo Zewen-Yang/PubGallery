@@ -1,0 +1,30 @@
+{
+  "name": "pub-gallery",
+  "private": true,
+  "version": "0.1.0",
+  "type": "module",
+  "scripts": {
+    "dev": "vite",
+    "sync": "node scripts/sync-bib.mjs",
+    "build": "vite build",
+    "preview": "vite preview"
+  },
+  "dependencies": {
+    "@fontsource/eb-garamond": "5.1.0",
+    "@react-three/drei": "9.114.0",
+    "@react-three/fiber": "8.17.10",
+    "@react-three/postprocessing": "2.16.3",
+    "d3-geo": "3.1.1",
+    "maath": "0.10.8",
+    "react": "18.3.1",
+    "react-dom": "18.3.1",
+    "three": "0.169.0",
+    "topojson-client": "3.1.0",
+    "world-atlas": "2.0.2",
+    "zustand": "4.5.5"
+  },
+  "devDependencies": {
+    "@vitejs/plugin-react": "4.3.3",
+    "vite": "5.4.10"
+  }
+}
