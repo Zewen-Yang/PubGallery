@@ -4,6 +4,8 @@ import { PAPER_BY_ID, BOOKCASES, CASE_BY_ID, placeFor } from './lib/papers.js';
 // Animated values shared by every frame loop (kept outside React to avoid re-renders).
 // dragV / dragVy: drag momentum; dYaw / dPitch: what the drag turned this frame (the globe follows both).
 // zoom: 0 = the whole star map, 1 = close on the globe (wheel, or a pinned country).
+// Idle turning speed of the star map and of the globe (radians per second).
+export const IDLE_SPIN = 0.02;
 export const anim = { map: 0, rotY: 0, dragV: 0, dragVy: 0, dYaw: 0, dPitch: 0, zoom: 0, zoomGoal: 0 };
 
 function setHash(id) {

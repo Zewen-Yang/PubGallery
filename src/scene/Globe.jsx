@@ -7,7 +7,7 @@ import world from 'world-atlas/countries-110m.json';
 import { MAP_CENTER } from '../lib/papers.js';
 import { SITES, SITE_BY_ID, COUNTRY_BY_ISO, CITIES, HOME, focusOf } from '../lib/collab.js';
 import { siteObjects, cityAnchors, labelEls } from './registry.js';
-import { useStore, anim } from '../store.js';
+import { useStore, anim, IDLE_SPIN } from '../store.js';
 
 export const GLOBE_R = 3.0;
 // The globe hangs below the star clusters.
@@ -380,7 +380,7 @@ export function Globe() {
       const lat = c.sites.reduce((a, s) => a + s.lat * s.papers.length, 0) / w;
       q.slerp(_q.setFromEuler(_e.set(THREE.MathUtils.degToRad(lat) * 0.8, spinFor(lon), 0)), 1 - Math.exp(-2.5 * dt));
     } else if (mode === 'map' && !dragging) {
-      q.multiply(_q.setFromAxisAngle(Y_AXIS, dt * 0.05)); // idle: turn slowly about its own axis
+      q.multiply(_q.setFromAxisAngle(Y_AXIS, dt * IDLE_SPIN)); // idle: turn slowly about its own axis
     }
     body.current.material.opacity = o;
     const u = dots.current.material.uniforms;

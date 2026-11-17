@@ -8,7 +8,7 @@ import { PAPERS, BOOKS, LINKS, BOOKCASES, CASE_BY_ID, MAP_CENTER } from '../lib/
 import { PAPER_SITES, SITE_PAPERS, focusOf } from '../lib/collab.js';
 import { starObjects, siteObjects } from './registry.js';
 import { FONT } from './fonts.js';
-import { useStore, anim } from '../store.js';
+import { useStore, anim, IDLE_SPIN } from '../store.js';
 import { Library } from './Library.jsx';
 import { Paper } from './Paper.jsx';
 import { Globe, GLOBE_R, GLOBE_CENTER } from './Globe.jsx';
@@ -74,7 +74,7 @@ function Director() {
       // Sideways drags turn the star clusters and the globe; up/down drags tip the globe only.
       anim.dYaw = anim.dragV;
       anim.dPitch = anim.dragVy;
-      anim.rotY += dt * 0.05 + anim.dragV;
+      anim.rotY += dt * IDLE_SPIN + anim.dragV;
       anim.dragV *= 0.92;
       anim.dragVy *= 0.92;
     } else {
