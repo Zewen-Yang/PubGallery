@@ -1,5 +1,5 @@
 // The library: one bookcase per research area, one shelf per sub-topic.
-// `keys` are citation keys from papers.bib. A paper may sit on several shelves (in several bookcases):
+// `keys` are citation keys from papers.bib and chinese.bib. A paper may sit on several shelves (in several bookcases):
 // just list its key in each. The first place it is listed (in bookcase order) is its "home",
 // used for the star map and for deep links.
 // A paper can also be placed from the bib itself with `category = {ml/gp; control/learning}`
@@ -62,6 +62,8 @@ export const BOOKCASES = [
           'dubey_STARProtocols2025_protocol', 'WECKBECKER20242326', 'dubey_iScience2024_nestedmodel',
         ],
       },
+      // Chinese journal papers
+      { id: 'pattern', name: 'Recognition & Stochastic Models', keys: ['Jia_TIS_2018_gesture', 'Yan_CJSR_2018_markov'] },
     ],
   },
   {
@@ -74,11 +76,23 @@ export const BOOKCASES = [
       { id: 'control', name: 'Robot Control', keys: ['li_ICRA_2026_RCM', 'zhuang2026safeconsensuscooperativemanipulation'] },
       {
         id: 'nav',
-        name: 'Underwater Navigation & Perception',
+        name: 'Underwater Vehicle Applications',
         keys: [
           'Yan_CCC_2018_transversalnavigation', 'Yan_ACCESS_2019_finealignment', 'Yan_SENSORS_2018_polarinitialalignment',
           'Yan_CPE_2021_pathplanning', 'Yan_ACCESS_2018_pathplanning', 'Yan_ACCESS_2021_multilevelthresholding',
           'Yan_SENSORS_2018_polarcooperative',
+          // Chinese journal papers
+          'Yan_HUST_2019_motionparameter', 'Jia_SLGC_2016_initialalignment', 'Jia_SDKJ_2015_cubaturekalman',
+        ],
+      },
+      {
+        // Chinese journal papers
+        id: 'plant',
+        name: 'Plant Factory & Embedded Systems',
+        keys: [
+          'Yang_CEA_2018_plantfactory', 'Yang_JSNY_2018_plantfactoryenergy', 'Jia_YYKJ_2018_sensorplacement', 'Jia_TYKJ_2018_temperaturesensors',
+          'Jia_SLGC_2017_miniplantfactory', 'Luo_TYKJ_2017_nutrientsolution', 'Luo_TYKJ_2017_aeroponic', 'Tang_KJWH_2016_stm32',
+          'Liu_KJWH_2017_balancevehicle', 'Liu_KJWH_2017_trackingcar',
         ],
       },
     ],
@@ -92,7 +106,12 @@ export const BOOKCASES = [
       {
         id: 'tracking',
         name: 'Trajectory Tracking',
-        keys: ['Yan_CCC_2018_pathtracking', 'Yan_ACCESS_2019_trajectory', 'Zhou_ACCESS_2019_trajectorytracking', 'Yan_CCC_2019_divingcontrol'],
+        keys: [
+          'Yan_CCC_2018_pathtracking', 'Yan_ACCESS_2019_trajectory', 'Zhou_ACCESS_2019_trajectorytracking', 'Yan_CCC_2019_divingcontrol',
+          // Chinese journal papers
+          'Jia_TYKJ_2018_backsteppingnn', 'Lin_TYKJ_2018_depthbackstepping', 'Yang_CEA_2017_highgainobserver', 'Yang_JDGC_2017_backstepping',
+          'Yan_YHZT_2017_backsteppingslidingmode', 'Wang_KJWH_2017_controlsystemmodel',
+        ],
       },
       { id: 'robust', name: 'Robust & Recovery Control', keys: ['Zhou_CCC_2019_timedelaystatefeedback', 'Du_OCEANS_2019_recoverycontroller'] },
       {

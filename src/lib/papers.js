@@ -1,4 +1,5 @@
 import bibSource from '../data/papers.bib?raw';
+import chineseSource from '../data/chinese.bib?raw';
 import { parseBib, cleanLatex, parseAuthors, cleanBibtex } from './bib.js';
 import { BOOKCASES, placePaper } from '../data/taxonomy.js';
 
@@ -46,8 +47,10 @@ function shortTitle(title) {
   return base.length > 34 ? base.slice(0, 32).trimEnd() + '…' : base;
 }
 
+// English papers first, then the Chinese journal papers (chinese.bib on the homepage).
 function buildPapers() {
-  return parseBib(bibSource).map((e) => {
+  const entries = [...parseBib(bibSource), ...parseBib(chineseSource).map((e) => ({ ...e, chinese: true }))];
+  return entries.map((e) => {
     const f = e.fields;
     const title = cleanLatex(f.title);
     const links = [];
@@ -66,7 +69,9 @@ function buildPapers() {
       authors: parseAuthors(f.author),
       year: +(f.year || '').replace(/\D/g, '') || 0,
       venue: cleanLatex(f.journal || f.booktitle || f.publisher || f.institution || ''),
-      abbr: cleanLatex(f.abbr || ''),
+      // The cover font is Latin only, so Chinese journal papers get a Latin badge.
+      abbr: e.chinese ? 'Chinese' : cleanLatex(f.abbr || ''),
+      chinese: !!e.chinese,
       isJournal: e.type === 'article' && !/arxiv/i.test(f.journal || ''),
       selected: /true/i.test(f.selected || ''),
       note: safeNote(f.note),
