@@ -48,7 +48,7 @@ function Cover({ p, w, h, d }) {
   const fh = h - m * 2;
   const line = 0.006;
   const abbr = (p.abbr || (p.isJournal ? 'Journal' : 'Conference')).toUpperCase();
-  const abbrSize = abbr.length > 9 ? 0.043 : 0.056;
+  const abbrSize = abbr.length > 15 ? 0.036 : abbr.length > 9 ? 0.043 : 0.056;
   return (
     <group position={[w / 2 + 0.003, 0, 0]} rotation={[0, Math.PI / 2, 0]}>
       {/* gilt frame */}

@@ -69,8 +69,9 @@ function buildPapers() {
       authors: parseAuthors(f.author),
       year: +(f.year || '').replace(/\D/g, '') || 0,
       venue: cleanLatex(f.journal || f.booktitle || f.publisher || f.institution || ''),
-      // The cover font is Latin only, so Chinese journal papers get a Latin badge.
-      abbr: e.chinese ? 'Chinese' : cleanLatex(f.abbr || ''),
+      // The cover font is Latin only, so Chinese journal papers show their Latin journal abbreviation
+      // (`journal_abbr` in chinese.bib) instead of the homepage's Chinese badge.
+      abbr: e.chinese ? [cleanLatex(f.journal_abbr || ''), '(Chinese)'].filter(Boolean).join(' ') : cleanLatex(f.abbr || ''),
       chinese: !!e.chinese,
       isJournal: e.type === 'article' && !/arxiv/i.test(f.journal || ''),
       selected: /true/i.test(f.selected || ''),
