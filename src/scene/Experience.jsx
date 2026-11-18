@@ -8,7 +8,7 @@ import { PAPERS, BOOKS, LINKS, BOOKCASES, CASE_BY_ID, MAP_CENTER } from '../lib/
 import { PAPER_SITES, SITE_PAPERS, focusOf } from '../lib/collab.js';
 import { starObjects, siteObjects } from './registry.js';
 import { FONT } from './fonts.js';
-import { useStore, anim, IDLE_SPIN } from '../store.js';
+import { useStore, anim, IDLE_SPIN, LIB_YAW_MAX } from '../store.js';
 import { Library } from './Library.jsx';
 import { Paper } from './Paper.jsx';
 import { Globe, GLOBE_R, GLOBE_CENTER } from './Globe.jsx';
@@ -27,9 +27,25 @@ function Director() {
 
   useEffect(() => {
     const el = gl.domElement;
-    const down = (e) => (drag.current = { down: true, x: e.clientX, y: e.clientY });
+    const down = (e) => {
+      drag.current = { down: true, x: e.clientX, y: e.clientY, x0: e.clientX };
+      anim.libDragged = false;
+    };
     const move = (e) => {
-      if (!drag.current.down || useStore.getState().mode !== 'map') return;
+      if (!drag.current.down) return;
+      const s = useStore.getState();
+      // Room overview: sideways drags turn the view around the room.
+      if (s.mode === 'library' && !s.focus && !s.selected && !s.listOpen) {
+        if (Math.abs(e.clientX - drag.current.x0) > 6) anim.libDragged = true;
+        if (anim.libDragged) {
+          const k = 2.4 / Math.max(600, window.innerWidth);
+          anim.libYawGoal = THREE.MathUtils.clamp(anim.libYawGoal + (e.clientX - drag.current.x) * k, -LIB_YAW_MAX, LIB_YAW_MAX);
+        }
+        drag.current.x = e.clientX;
+        drag.current.y = e.clientY;
+        return;
+      }
+      if (s.mode !== 'map') return;
       anim.dragV += (e.clientX - drag.current.x) * 0.0006;
       anim.dragVy += (e.clientY - drag.current.y) * 0.0006;
       drag.current.x = e.clientX;
@@ -149,8 +165,15 @@ function CameraRig() {
       const half = 8.7;
       // Portrait screens can't fit the whole arc; show the middle and let the index do the rest.
       const dist = Math.min(Math.max(4.6 / tanV, half / (tanV * aspect)), 24);
-      pos = [px * 0.6, 3.4 + py * 0.3, OVERVIEW_LOOK.z + dist];
-      look.copy(OVERVIEW_LOOK);
+      // Turned by dragging: the camera swings around the room centre (the origin), so the
+      // bookcases at either end of the arc can be brought to the middle of the screen.
+      anim.libYaw = THREE.MathUtils.damp(anim.libYaw, anim.libYawGoal, 4, dt);
+      const c = Math.cos(anim.libYaw), s = Math.sin(anim.libYaw);
+      const turn = (x, z) => [x * c + z * s, -x * s + z * c];
+      const [cx, cz] = turn(px * 0.6, OVERVIEW_LOOK.z + dist);
+      const [lx, lz] = turn(OVERVIEW_LOOK.x, OVERVIEW_LOOK.z);
+      pos = [cx, 3.4 + py * 0.3, cz];
+      look.set(lx, OVERVIEW_LOOK.y, lz);
     }
     easing.damp3(camera.position, pos, smooth, dt);
     easing.damp3(lookCur, look, smooth * 0.8, dt);

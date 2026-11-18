@@ -22,7 +22,7 @@ body {
 button { font: inherit; color: inherit; cursor: pointer; }
 a { color: inherit; }
 
-.stage { position: fixed; inset: 0; }
+.stage { position: fixed; inset: 0; touch-action: none; }
 .loading {
   position: fixed; inset: 0; display: grid; place-items: center;
   font-family: var(--serif); font-style: italic; font-size: 20px; color: var(--ink-dim);
@@ -137,7 +137,45 @@ a { color: inherit; }
   background: rgba(14, 10, 8, 0.86); backdrop-filter: blur(14px);
   padding: 96px 24px 60px; animation: fade 0.25s ease both;
 }
-.list-inner { max-width: 880px; margin: 0 auto; }
+.list-layout { display: grid; grid-template-columns: 230px minmax(0, 880px); gap: 48px; justify-content: center; align-items: start; }
+.list-inner { min-width: 0; }
+.list-toc { position: sticky; top: 0; max-height: calc(100vh - 140px); overflow: auto; padding: 4px 4px 4px 0; scrollbar-width: thin; }
+.toc-title { font-size: 11px; letter-spacing: 0.22em; text-transform: uppercase; color: var(--gold); margin: 10px 0 14px; }
+.list-toc ol { list-style: none; margin: 0; padding: 0; }
+.listview .list-toc li { display: block; padding: 0; border: 0; }
+.listview .list-toc > ol > li { margin-bottom: 14px; }
+.list-toc button {
+  all: unset; box-sizing: border-box; cursor: pointer; width: 100%; display: flex; align-items: baseline; gap: 8px;
+  padding: 4px 8px; border-radius: 6px; border-left: 2px solid transparent; color: var(--ink-dim); transition: color 0.15s, background 0.15s;
+}
+.list-toc button:hover:not(:disabled) { color: var(--ink); background: rgba(255, 255, 255, 0.04); }
+.list-toc button:disabled { opacity: 0.35; cursor: default; }
+.list-toc button.on { color: var(--ink); border-left-color: var(--gold); background: rgba(201, 162, 63, 0.08); }
+.list-toc .nm { flex: 1; min-width: 0; }
+.list-toc small { font-size: 11px; opacity: 0.7; font-variant-numeric: tabular-nums; }
+.toc-case { font-family: var(--serif); font-size: 17px; }
+.toc-case .num { font-family: var(--sans); font-size: 10px; letter-spacing: 0.15em; color: var(--gold); min-width: 22px; }
+.toc-shelf { font-size: 12.5px; line-height: 1.35; padding-left: 30px !important; align-items: center !important; }
+.toc-shelf i { width: 6px; height: 6px; border-radius: 50%; flex: none; opacity: 0.8; }
+.list-filter { display: flex; flex-wrap: wrap; gap: 8px; margin: -10px 0 10px; }
+.list-filter.sub { margin: 0 0 10px; padding-left: 14px; border-left: 1px solid var(--line); }
+.chip {
+  display: inline-flex; align-items: center; gap: 7px; padding: 6px 13px; border-radius: 999px;
+  border: 1px solid var(--line); background: rgba(255, 255, 255, 0.03); color: var(--ink-dim);
+  font-size: 13px; transition: color 0.15s, background 0.15s, border-color 0.15s;
+}
+.chip:hover:not(:disabled) { color: var(--ink); border-color: rgba(243, 233, 210, 0.3); }
+.chip:disabled { opacity: 0.35; cursor: default; }
+.chip.on { background: var(--ink); color: #1a120c; border-color: var(--ink); }
+.chip i { width: 7px; height: 7px; border-radius: 50%; }
+.chip small { font-size: 11px; opacity: 0.65; font-variant-numeric: tabular-nums; }
+.sub .chip { font-size: 12px; padding: 5px 11px; }
+.list-empty { font-family: var(--serif); font-style: italic; color: var(--ink-dim); margin-top: 40px; }
+.list-case h2, .listview h3 { scroll-margin-top: 110px; }
+@media (max-width: 1100px) {
+  .list-layout { grid-template-columns: minmax(0, 880px); }
+  .list-toc { display: none; }
+}
 .list-head { display: flex; align-items: center; gap: 14px; margin-bottom: 28px; position: relative; }
 .list-head input[type='text'], .list-head input:not([type]) {
   flex: 1; min-width: 0; padding: 12px 16px; border-radius: 10px; border: 1px solid var(--line);
@@ -309,6 +347,11 @@ a { color: inherit; }
   font-size: 16px; transition: background 0.2s, border-color 0.2s;
 }
 .fp-arrows button:hover:not(:disabled) { border-color: var(--ink); background: rgba(255,255,255,0.05); }
+.fp-arrows .fp-back {
+  width: auto; border-radius: 999px; padding: 0 20px; margin-left: 6px;
+  font-size: 11px; letter-spacing: 0.18em; text-transform: uppercase; color: var(--ink-dim);
+}
+.fp-arrows .fp-back:hover { color: var(--ink); }
 .fp-arrows button:disabled { opacity: 0.25; cursor: default; }
 
 /* ---------- cursor ---------- */

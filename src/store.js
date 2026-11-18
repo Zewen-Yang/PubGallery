@@ -6,7 +6,11 @@ import { PAPER_BY_ID, BOOKCASES, CASE_BY_ID, placeFor } from './lib/papers.js';
 // zoom: 0 = the whole star map, 1 = close on the globe (wheel, or a pinned country).
 // Idle turning speed of the star map and of the globe (radians per second).
 export const IDLE_SPIN = 0.02;
-export const anim = { map: 0, rotY: 0, dragV: 0, dragVy: 0, dYaw: 0, dPitch: 0, zoom: 0, zoomGoal: 0 };
+// libYaw / libYawGoal: how far the room overview is turned left or right (drag to turn).
+// libDragged: the current press turned the room, so its click must not enter a bookcase.
+export const anim = { map: 0, rotY: 0, dragV: 0, dragVy: 0, dYaw: 0, dPitch: 0, zoom: 0, zoomGoal: 0, libYaw: 0, libYawGoal: 0, libDragged: false };
+// How far the room overview can turn each way (radians), enough to face the end bookcases.
+export const LIB_YAW_MAX = 0.5;
 
 function setHash(id) {
   const url = id ? `#${encodeURIComponent(id)}` : window.location.pathname + window.location.search;
@@ -74,4 +78,4 @@ export function initialFromHash() {
   }
 }
 
-if (import.meta.env.DEV) window.__store = useStore;
+if (import.meta.env.DEV) Object.assign(window, { __store: useStore, __anim: anim });

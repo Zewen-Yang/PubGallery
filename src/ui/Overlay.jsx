@@ -183,7 +183,7 @@ export function IndexNav() {
           </button>
         ))}
       </div>
-      <div className="index-hint">{focus ? '↑ ↓ shelves · ← → bookcases · Esc room' : 'Choose a bookcase'}</div>
+      <div className="index-hint">{focus ? '↑ ↓ shelves · ← → bookcases · Esc room' : 'Drag to turn · choose a bookcase'}</div>
     </footer>
   );
 }
@@ -197,6 +197,7 @@ export function FocusPanel() {
   const listOpen = useStore((s) => s.listOpen);
   const stepFocus = useStore((s) => s.stepFocus);
   const setShelf = useStore((s) => s.setShelf);
+  const setFocus = useStore((s) => s.setFocus);
   const [shown, setShown] = useState(focus);
   useEffect(() => {
     setShown(null);
@@ -240,6 +241,9 @@ export function FocusPanel() {
           </button>
           <button onClick={() => stepFocus(1)} disabled={bc.index === BOOKCASES.length - 1} aria-label="Next bookcase">
             →
+          </button>
+          <button className="fp-back" onClick={() => setFocus(null)} aria-label="Back to library">
+            Back to library
           </button>
         </div>
       </aside>
@@ -566,73 +570,200 @@ export function ListView() {
   const select = useStore((s) => s.select);
   const [q, setQ] = useState('');
   const [onlySel, setOnlySel] = useState(false);
+  const [cat, setCat] = useState(null); // { bookcase, shelf? } or null for every category
+  const [current, setCurrent] = useState(null); // id of the section in view, for the contents
+  const scrollRef = useRef();
+  const pendingJump = useRef(null);
 
-  if (!open) return null;
   const needle = q.trim().toLowerCase();
   const match = (p) =>
     (!onlySel || p.selected) &&
     (!needle ||
       [p.title, p.venue, p.abbr, String(p.year), ...p.authors.map((a) => a.name)].join(' ').toLowerCase().includes(needle));
+  const hits = open ? PAPERS.filter(match) : [];
+  const count = (bc, sh) => hits.filter((p) => isOn(p, bc, sh)).length;
+  const shown = (bc, sh) => !cat || (cat.bookcase === bc && (!cat.shelf || !sh || cat.shelf === sh));
+
+  // Scroll spy: the last heading that has passed under the top bar is the current one.
+  useEffect(() => {
+    const el = scrollRef.current;
+    if (!open || !el) return;
+    const onScroll = () => {
+      const top = el.getBoundingClientRect().top + 140;
+      let id = null;
+      for (const h of el.querySelectorAll('[data-toc]')) {
+        if (h.getBoundingClientRect().top <= top) id = h.dataset.toc;
+        else break;
+      }
+      setCurrent(id);
+    };
+    onScroll();
+    el.addEventListener('scroll', onScroll, { passive: true });
+    return () => el.removeEventListener('scroll', onScroll);
+  }, [open, cat, needle, onlySel]);
+
+  // Jump after a render that may have brought the target section back.
+  useEffect(() => {
+    const id = pendingJump.current;
+    if (!id) return;
+    pendingJump.current = null;
+    scrollRef.current?.querySelector(`[data-toc="${id}"]`)?.scrollIntoView({ behavior: 'smooth', block: 'start' });
+  });
+
+  if (!open) return null;
+
+  const jump = (bc, sh) => {
+    if (!shown(bc, sh)) setCat(null);
+    pendingJump.current = sh ? `${bc}/${sh}` : bc;
+    setCurrent(pendingJump.current);
+    if (shown(bc, sh)) {
+      scrollRef.current?.querySelector(`[data-toc="${pendingJump.current}"]`)?.scrollIntoView({ behavior: 'smooth', block: 'start' });
+      pendingJump.current = null;
+    }
+  };
+  const pick = (next) => {
+    setCat(next);
+    scrollRef.current?.scrollTo({ top: 0 });
+  };
+  const catCase = cat && CASE_BY_ID[cat.bookcase];
 
   return (
-    <div className="listview">
-      <div className="list-inner">
-        <div className="list-head">
-          <input autoFocus placeholder="Search title, author, venue, year…" value={q} onChange={(e) => setQ(e.target.value)} />
-          <label>
-            <input type="checkbox" checked={onlySel} onChange={(e) => setOnlySel(e.target.checked)} /> Selected only
-          </label>
-          <button className="close inline" onClick={() => toggleList(false)} aria-label="Close list">
-            ×
-          </button>
-        </div>
-        {BOOKCASES.map((bc, bi) => {
-          const all = PAPERS.filter((p) => isOn(p, bc.id) && match(p));
-          if (!all.length) return null;
-          return (
-            <section key={bc.id} className="list-case">
-              <h2>
-                <span className="num">{ROMAN[bi]}</span> {bc.name} <small>{all.length}</small>
-              </h2>
-              {bc.shelves.map((s) => {
-                const rows = all.filter((p) => isOn(p, bc.id, s.id)).sort((a, b) => b.year - a.year);
-                if (!rows.length) return null;
-                return (
-                  <div key={s.id}>
-                    <h3>
-                      <i style={{ background: bc.palette[1] }} />
-                      {s.name}
-                    </h3>
-                    <ol>
-                      {rows.map((p) => (
-                        <li key={p.id}>
-                          <span className="yr">{p.year}</span>
-                          <div>
-                            <button className="ttl" onClick={() => select(p.id, { bookcase: bc.id, shelf: s.id })}>
-                              {p.selected && <span className="gold">★ </span>}
-                              {p.title}
-                            </button>
-                            <div className="au">
-                              <Authors authors={p.authors} />
-                            </div>
-                            <div className="vn">
-                              <b>{p.abbr}</b> {p.venue}
-                              {p.links.map((l) => (
-                                <a key={l.label} href={l.href} target="_blank" rel="noreferrer">
-                                  {l.label}
-                                </a>
-                              ))}
-                            </div>
-                          </div>
+    <div className="listview" ref={scrollRef}>
+      <div className="list-layout">
+        <nav className="list-toc" aria-label="Contents">
+          <div className="toc-title">Contents</div>
+          <ol>
+            {BOOKCASES.map((bc, bi) => {
+              const n = count(bc.id);
+              return (
+                <li key={bc.id} className={n ? '' : 'empty'}>
+                  <button
+                    className={`toc-case ${current === bc.id || current?.startsWith(bc.id + '/') ? 'on' : ''}`}
+                    onClick={() => jump(bc.id)}
+                    disabled={!n}
+                  >
+                    <span className="num">{ROMAN[bi]}</span>
+                    <span className="nm">{bc.name}</span>
+                    <small>{n}</small>
+                  </button>
+                  <ol>
+                    {bc.shelves.map((s) => {
+                      const m = count(bc.id, s.id);
+                      return (
+                        <li key={s.id}>
+                          <button
+                            className={`toc-shelf ${current === `${bc.id}/${s.id}` ? 'on' : ''}`}
+                            onClick={() => jump(bc.id, s.id)}
+                            disabled={!m}
+                          >
+                            <i style={{ background: bc.star }} />
+                            <span className="nm">{s.name}</span>
+                            <small>{m}</small>
+                          </button>
                         </li>
-                      ))}
-                    </ol>
-                  </div>
-                );
-              })}
-            </section>
-          );
-        })}
+                      );
+                    })}
+                  </ol>
+                </li>
+              );
+            })}
+          </ol>
+        </nav>
+
+        <div className="list-inner">
+          <div className="list-head">
+            <input autoFocus placeholder="Search title, author, venue, year…" value={q} onChange={(e) => setQ(e.target.value)} />
+            <label>
+              <input type="checkbox" checked={onlySel} onChange={(e) => setOnlySel(e.target.checked)} /> Selected only
+            </label>
+            <button className="close inline" onClick={() => toggleList(false)} aria-label="Close list">
+              ×
+            </button>
+          </div>
+
+          <div className="list-filter" role="toolbar" aria-label="Filter by category">
+            <button className={!cat ? 'chip on' : 'chip'} onClick={() => pick(null)}>
+              All <small>{hits.length}</small>
+            </button>
+            {BOOKCASES.map((bc) => (
+              <button
+                key={bc.id}
+                className={cat?.bookcase === bc.id ? 'chip on' : 'chip'}
+                onClick={() => pick(cat?.bookcase === bc.id && !cat.shelf ? null : { bookcase: bc.id })}
+              >
+                <i style={{ background: bc.star }} />
+                {bc.name} <small>{count(bc.id)}</small>
+              </button>
+            ))}
+          </div>
+          {catCase && (
+            <div className="list-filter sub" role="toolbar" aria-label={`Filter ${catCase.name} by topic`}>
+              {catCase.shelves.map((s) => (
+                <button
+                  key={s.id}
+                  className={cat.shelf === s.id ? 'chip on' : 'chip'}
+                  onClick={() => pick(cat.shelf === s.id ? { bookcase: catCase.id } : { bookcase: catCase.id, shelf: s.id })}
+                  disabled={!count(catCase.id, s.id)}
+                >
+                  {s.name} <small>{count(catCase.id, s.id)}</small>
+                </button>
+              ))}
+            </div>
+          )}
+
+          {!BOOKCASES.some((bc) => shown(bc.id) && count(bc.id, cat?.bookcase === bc.id ? cat.shelf : undefined)) && (
+            <p className="list-empty">No papers match.</p>
+          )}
+          {BOOKCASES.map((bc, bi) => {
+            if (!shown(bc.id)) return null;
+            const all = hits.filter((p) => isOn(p, bc.id));
+            if (!all.length) return null;
+            return (
+              <section key={bc.id} className="list-case">
+                <h2 data-toc={bc.id}>
+                  <span className="num">{ROMAN[bi]}</span> {bc.name} <small>{all.length}</small>
+                </h2>
+                {bc.shelves.map((s) => {
+                  if (!shown(bc.id, s.id)) return null;
+                  const rows = all.filter((p) => isOn(p, bc.id, s.id)).sort((a, b) => b.year - a.year);
+                  if (!rows.length) return null;
+                  return (
+                    <div key={s.id}>
+                      <h3 data-toc={`${bc.id}/${s.id}`}>
+                        <i style={{ background: bc.palette[1] }} />
+                        {s.name} <small>{rows.length}</small>
+                      </h3>
+                      <ol>
+                        {rows.map((p) => (
+                          <li key={p.id}>
+                            <span className="yr">{p.year}</span>
+                            <div>
+                              <button className="ttl" onClick={() => select(p.id, { bookcase: bc.id, shelf: s.id })}>
+                                {p.selected && <span className="gold">★ </span>}
+                                {p.title}
+                              </button>
+                              <div className="au">
+                                <Authors authors={p.authors} />
+                              </div>
+                              <div className="vn">
+                                <b>{p.abbr}</b> {p.venue}
+                                {p.links.map((l) => (
+                                  <a key={l.label} href={l.href} target="_blank" rel="noreferrer">
+                                    {l.label}
+                                  </a>
+                                ))}
+                              </div>
+                            </div>
+                          </li>
+                        ))}
+                      </ol>
+                    </div>
+                  );
+                })}
+              </section>
+            );
+          })}
+        </div>
       </div>
     </div>
   );
