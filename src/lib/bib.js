@@ -100,7 +100,7 @@ export function parseAuthors(s = '') {
 // Strip the fields that only al-folio cares about, so "Copy BibTeX" gives a clean entry.
 const SITE_FIELDS = [
   'abbr', 'selected', 'note', 'google_scholar_id', 'code', 'website', 'preview', 'annotation',
-  'category', 'bibtex_show', 'pdf', 'html', 'award', 'award_name', 'keywords', 'abstract', 'arxiv', 'journal_abbr',
+  'category', 'bibtex_show', 'pdf', 'html', 'award', 'award_name', 'keywords', 'abstract', 'arxiv',
 ];
 
 export function cleanBibtex(entry) {
