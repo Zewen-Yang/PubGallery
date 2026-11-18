@@ -16,7 +16,8 @@ import { FOV, TAN, focusPose, displaySlots } from './display.js';
 
 const LIB_BG = new THREE.Color('#0d0907');
 const MAP_BG = new THREE.Color('#03040b');
-const OVERVIEW_LOOK = new THREE.Vector3(0, 2.7, -5.4);
+// Aimed at the middle of the bookcases' height (floor to lamps), so the crests are not cut off.
+const OVERVIEW_LOOK = new THREE.Vector3(0, 3.5, -5.4);
 
 // Drives the shared animation values: library↔map progress, world rotation, background and fog.
 function Director() {
@@ -162,9 +163,12 @@ function CameraRig() {
       look.set(...pose.look);
       smooth = 0.75;
     } else {
-      const half = 8.7;
+      // Half the width and half the height the overview must fit, with room for the lamps above,
+      // the rug below, and the top bar and bookcase index that sit over the picture.
+      const half = 10.4;
+      const halfH = 6.6;
       // Portrait screens can't fit the whole arc; show the middle and let the index do the rest.
-      const dist = Math.min(Math.max(4.6 / tanV, half / (tanV * aspect)), 24);
+      const dist = Math.min(Math.max(halfH / tanV, half / (tanV * aspect)), 28);
       // Turned by dragging: the camera swings around the room centre (the origin), so the
       // bookcases at either end of the arc can be brought to the middle of the screen.
       anim.libYaw = THREE.MathUtils.damp(anim.libYaw, anim.libYawGoal, 4, dt);
@@ -172,7 +176,7 @@ function CameraRig() {
       const turn = (x, z) => [x * c + z * s, -x * s + z * c];
       const [cx, cz] = turn(px * 0.6, OVERVIEW_LOOK.z + dist);
       const [lx, lz] = turn(OVERVIEW_LOOK.x, OVERVIEW_LOOK.z);
-      pos = [cx, 3.4 + py * 0.3, cz];
+      pos = [cx, 4.3 + py * 0.3, cz];
       look.set(lx, OVERVIEW_LOOK.y, lz);
     }
     easing.damp3(camera.position, pos, smooth, dt);
